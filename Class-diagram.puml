@@ -1,0 +1,118 @@
+@startuml EventfindR_Domain_Model
+
+class User {
+  - userId: Long
+  - email: String
+  - password: String
+  - firstName: String
+  - lastName: String
+  - phone: String
+  - isOrganizer: Boolean
+  - createdAt: DateTime
+  + updateProfile(firstName: String, lastName: String, phone: String): void
+}
+
+class Event {
+  - eventId: Long
+  - name: String
+  - description: String
+  - date: DateTime
+  - price: BigDecimal
+  - ticketLink: String
+  - createdAt: DateTime
+  - isArchived: Boolean
+  + updateDetails(name: String, description: String, date: DateTime, price: BigDecimal): void
+  + archive(): void
+}
+
+class Venue {
+  - venueId: Long
+  - name: String
+  - city: String
+  - address: String
+}
+
+class Performer {
+  - performerId: Long
+  - name: String
+  - genre: String
+}
+
+class Photo {
+  - photoId: Long
+  - url: String
+  - uploadedAt: DateTime
+}
+
+class Attendance {
+  - attendanceId: Long
+  - status: AttendanceStatus
+  - createdAt: DateTime
+  + changeStatus(newStatus: AttendanceStatus): void
+}
+
+enum AttendanceStatus {
+  ATTENDING
+  FOLLOWING
+}
+
+User "1" --> "0..*" Event : organizes
+User "1" --> "0..*" Attendance : has
+Event "1" --> "0..*" Attendance : tracked by
+Event "0..*" --> "1" Venue : takes place at
+Event "0..*" --> "0..*" Performer : features
+Event "1" --> "0..*" Photo : contains
+Attendance --> AttendanceStatus : uses
+
+interface UserRepository {
+  + create(user: User): User
+  + read(id: Long): User
+  + update(user: User): User
+  + delete(id: Long): void
+  + findByEmail(email: String): User
+}
+
+interface EventRepository {
+  + create(event: Event): Event
+  + read(id: Long): Event
+  + update(event: Event): Event
+  + delete(id: Long): void
+  + findByVenueId(venueId: Long): Collection<Event>
+  + findByDateRange(from: DateTime, to: DateTime): Collection<Event>
+  + findByOrganizerId(organizerId: Long): Collection<Event>
+  + findByCity(city: String): Collection<Event>
+}
+
+interface AttendanceRepository {
+  + create(attendance: Attendance): Attendance
+  + read(id: Long): Attendance
+  + delete(id: Long): void
+  + findByUserId(userId: Long): Collection<Attendance>
+  + findByEventId(eventId: Long): Collection<Attendance>
+  + findByUserIdAndStatus(userId: Long, status: AttendanceStatus): Collection<Attendance>
+}
+
+class EventFactory {
+  + create(name: String, date: DateTime, venue: Venue, organizer: User): Event
+}
+
+class AttendanceFactory {
+  + create(user: User, event: Event, status: AttendanceStatus): Attendance
+}
+
+class EventDomainService {
+  + archiveExpiredEvents(): void
+  + getAttendanceCount(event: Event, status: AttendanceStatus): int
+}
+
+EventFactory ..> Event : creates
+AttendanceFactory ..> Attendance : creates
+
+EventDomainService ..> EventRepository : uses
+EventDomainService ..> AttendanceRepository : uses
+
+UserRepository ..> User : manages
+EventRepository ..> Event : manages
+AttendanceRepository ..> Attendance : manages
+
+@enduml
