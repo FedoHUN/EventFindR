@@ -1,6 +1,6 @@
 # EventfindR - Analýza projektu
 
-## Zadanie od zákazníka
+## Zadanie
 
 Cieľom projektu je vytvoriť platformu, na ktorej môžu používatelia vyhľadávať a sledovať eventy, najmä hudobné, ale aj iné kultúrne či spoločenské podujatia. Organizátori môžu pridávať vlastné eventy s názvom, popisom, miestom konania, dátumom, cenou, fotografiami, odkazmi na kúpu lístkov a menami vystupujúcich. Používatelia si môžu eventy uložiť do svojho profilu buď ako „zúčastním sa" alebo „sledujem" a neskôr ich jednoducho nájsť na svojom profile cez prehľadné záložky. Systém bude podporovať vyhľadávanie a filtrovanie eventov podľa názvu, lokácie, vystupujúcich umelcov a dátumu.
 
