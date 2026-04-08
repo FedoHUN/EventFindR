@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="1" author="eventfindr">
+        <createTable tableName="app_user">
+            <column name="user_id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="varchar(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="rola" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2" author="eventfindr">
+        <createTable tableName="event">
+            <column name="event_id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(2000)"/>
+            <column name="location" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="event_date" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="price" type="decimal(10,2)"/>
+            <column name="ticket_url" type="varchar(500)"/>
+            <column name="image_url" type="varchar(500)"/>
+            <column name="performers" type="varchar(500)"/>
+            <column name="created" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="organizer_user_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="event"
+                baseColumnNames="organizer_user_id"
+                constraintName="fk_event_organizer"
+                referencedTableName="app_user"
+                referencedColumnNames="user_id"/>
+    </changeSet>
+
+    <changeSet id="3" author="eventfindr">
+        <createTable tableName="event_attendance">
+            <column name="attendance_id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="event_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="event_attendance"
+                baseColumnNames="event_id"
+                constraintName="fk_attendance_event"
+                referencedTableName="event"
+                referencedColumnNames="event_id"/>
+
+        <addForeignKeyConstraint
+                baseTableName="event_attendance"
+                baseColumnNames="user_id"
+                constraintName="fk_attendance_user"
+                referencedTableName="app_user"
+                referencedColumnNames="user_id"/>
+
+        <addUniqueConstraint
+                tableName="event_attendance"
+                columnNames="event_id, user_id"
+                constraintName="uq_attendance_event_user"/>
+    </changeSet>
+
+</databaseChangeLog>

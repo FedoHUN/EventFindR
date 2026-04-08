@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings
+        xmlns="https://jakarta.ee/xml/ns/persistence/orm"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+        https://jakarta.ee/xml/ns/persistence/orm
+        https://jakarta.ee/xml/ns/persistence/orm/orm_3_0.xsd"
+        version="3.0">
+
+    <entity class="sk.eventfindr.fsa.domain.User" access="FIELD">
+        <table name="app_user"/>
+        <attributes>
+            <id name="id">
+                <column name="user_id"/>
+                <generated-value strategy="IDENTITY"/>
+            </id>
+            <basic name="name">
+                <column name="name" nullable="false"/>
+            </basic>
+            <basic name="email">
+                <column name="email" nullable="false" unique="true"/>
+            </basic>
+            <basic name="rola">
+                <column name="rola" nullable="false"/>
+                <convert converter="sk.eventfindr.fsa.jpa.UserRoleConverter"/>
+            </basic>
+        </attributes>
+    </entity>
+
+    <entity class="sk.eventfindr.fsa.domain.Event" access="FIELD">
+        <table name="event"/>
+        <attributes>
+            <id name="id">
+                <column name="event_id"/>
+                <generated-value strategy="IDENTITY"/>
+            </id>
+            <basic name="name">
+                <column name="name" nullable="false"/>
+            </basic>
+            <basic name="description">
+                <column name="description" length="2000"/>
+            </basic>
+            <basic name="location">
+                <column name="location" nullable="false"/>
+            </basic>
+            <basic name="eventDate">
+                <column name="event_date" nullable="false"/>
+            </basic>
+            <basic name="price">
+                <column name="price" precision="10" scale="2"/>
+            </basic>
+            <basic name="ticketUrl">
+                <column name="ticket_url"/>
+            </basic>
+            <basic name="imageUrl">
+                <column name="image_url"/>
+            </basic>
+            <basic name="performers">
+                <column name="performers"/>
+            </basic>
+            <basic name="created">
+                <column name="created" nullable="false"/>
+            </basic>
+            <many-to-one name="organizer" target-entity="sk.eventfindr.fsa.domain.User">
+                <join-column name="organizer_user_id" nullable="false"/>
+            </many-to-one>
+        </attributes>
+    </entity>
+
+    <entity class="sk.eventfindr.fsa.domain.EventAttendance" access="FIELD">
+        <table name="event_attendance"/>
+        <attributes>
+            <id name="id">
+                <column name="attendance_id"/>
+                <generated-value strategy="IDENTITY"/>
+            </id>
+            <basic name="status">
+                <column name="status" nullable="false"/>
+                <convert converter="sk.eventfindr.fsa.jpa.AttendanceStatusConverter"/>
+            </basic>
+            <basic name="created">
+                <column name="created" nullable="false"/>
+            </basic>
+            <many-to-one name="event" target-entity="sk.eventfindr.fsa.domain.Event">
+                <join-column name="event_id" nullable="false"/>
+            </many-to-one>
+            <many-to-one name="user" target-entity="sk.eventfindr.fsa.domain.User">
+                <join-column name="user_id" nullable="false"/>
+            </many-to-one>
+        </attributes>
+    </entity>
+
+</entity-mappings>
