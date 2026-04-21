@@ -1,0 +1,12 @@
+.event-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+  }
+}
+
+.placeholder-img {
+  height: 200px;
+  background: linear-gradient(135deg, var(--ef-primary), var(--ef-primary-light));
+}
