@@ -83,18 +83,35 @@
           </a>
         }
 
-        @if (auth.isLoggedIn()) {
+        @if (auth.user()) {
           <div class="d-grid gap-2">
-            <button class="btn btn-success" (click)="markAttendance('ATTENDING')">
-              <i class="bi bi-check-circle me-2"></i>I'm Attending
+            <button
+              class="btn attendance-btn"
+              [class.btn-outline-success]="!attendingActive() && !attendingHoverDanger()"
+              [class.btn-success]="attendingActive() && !attendingHoverDanger()"
+              [class.btn-danger]="attendingHoverDanger()"
+              [disabled]="attendanceBusy()"
+              (mouseenter)="hoveredAttendance.set('ATTENDING')"
+              (mouseleave)="hoveredAttendance.set(null)"
+              (click)="toggleAttendance('ATTENDING')">
+              <i class="bi me-2" [class.bi-check-circle]="!attendingHoverDanger()" [class.bi-x-circle]="attendingHoverDanger()"></i>{{ attendingButtonText() }}
             </button>
-            <button class="btn btn-outline-warning" (click)="markAttendance('WATCHING')">
-              <i class="bi bi-eye me-2"></i>Watching
+            <button
+              class="btn attendance-btn"
+              [class.btn-outline-warning]="!watchingActive() && !watchingHoverDanger()"
+              [class.btn-warning]="watchingActive() && !watchingHoverDanger()"
+              [class.btn-danger]="watchingHoverDanger()"
+              [disabled]="attendanceBusy()"
+              (mouseenter)="hoveredAttendance.set('WATCHING')"
+              (mouseleave)="hoveredAttendance.set(null)"
+              (click)="toggleAttendance('WATCHING')">
+              <i class="bi me-2" [class.bi-eye]="!watchingHoverDanger()" [class.bi-x-circle]="watchingHoverDanger()"></i>{{ watchingButtonText() }}
             </button>
           </div>
         } @else {
           <div class="alert alert-info">
             <i class="bi bi-info-circle me-2"></i>Log in to mark this event as attending or watching.
+            <button class="btn btn-sm btn-primary mt-2 w-100" (click)="auth.login()">Log in</button>
           </div>
         }
 

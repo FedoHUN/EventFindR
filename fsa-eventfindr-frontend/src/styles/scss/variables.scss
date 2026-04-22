@@ -1,0 +1,30 @@
+// EventfindR Theme Colors
+$ef-primary: #6f42c1;
+$ef-primary-light: #8b5cf6;
+$ef-primary-dark: #5b21b6;
+$ef-primary-50: #f4eeff;
+$ef-primary-200: #d6c2ff;
+$ef-primary-700: #4b1f8a;
+
+$ef-accent: #f59e0b;
+$ef-accent-soft: #ffd9a0;
+$ef-accent-strong: #e88a00;
+
+$ef-bg: #f8f9fa;
+$ef-surface-warm: #fff7ed;
+$ef-border-subtle: #e9dffb;
+
+$ef-text: #212529;
+$ef-text-muted: #6c757d;
+
+// Bootstrap Variable Overrides
+$body-bg: $ef-bg;
+$body-color: $ef-text;
+$font-family-sans-serif: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+// Override Bootstrap's primary color; other defaults (secondary, success, danger,
+// warning, info, light, dark) are preserved because we only override "primary".
+$primary: $ef-primary;
+
+// Buttons
+$btn-font-weight: 600;

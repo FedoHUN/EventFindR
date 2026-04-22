@@ -1,14 +1,24 @@
-import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { DOCUMENT, isPlatformBrowser } from '@angular/common';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  OnDestroy,
+  PLATFORM_ID,
+  ViewChild,
+  inject,
+  signal
+} from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../auth/auth';
-import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-navbar',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, RouterLinkActive, FormsModule],
+  imports: [RouterLink, RouterLinkActive],
   template: `
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+    <nav #navbarEl class="navbar navbar-expand-lg navbar-dark bg-ef-primary-dark fixed-top">
       <div class="container">
         <a class="navbar-brand fw-bold" routerLink="/">
           <i class="bi bi-calendar-event me-2"></i>EventfindR
@@ -35,70 +45,72 @@ import { FormsModule } from '@angular/forms';
             <li class="nav-item">
               <a class="nav-link" routerLink="/about" routerLinkActive="active">About Us</a>
             </li>
-          </ul>
-          <div class="d-flex align-items-center gap-2">
-            @if (auth.isLoggedIn()) {
-              <span class="text-light me-2">
-                <i class="bi bi-person-circle me-1"></i>{{ auth.currentUser()?.name }}
-                @if (auth.isOrganizer()) {
-                  <span class="badge bg-warning text-dark ms-1">Organizer</span>
-                }
-              </span>
-              <button class="btn btn-outline-light btn-sm" (click)="auth.logout()">Logout</button>
-            } @else {
-              <button class="btn btn-outline-light btn-sm" (click)="showLogin.set(true)">
-                <i class="bi bi-box-arrow-in-right me-1"></i>Login
-              </button>
+            @if (auth.user()) {
+              <li class="nav-item">
+                <a class="nav-link" routerLink="/my-profile" routerLinkActive="active">My Profile</a>
+              </li>
             }
-          </div>
+          </ul>
+
+          @if (auth.user(); as user) {
+            <span class="navbar-text text-light mx-auto">
+              Hi, {{ user.name }}
+              @if (auth.isOrganizer()) {
+                <span class="badge bg-warning text-dark ms-2">Organizer</span>
+              }
+            </span>
+            <button class="btn btn-outline-light btn-sm" (click)="auth.logout()">Logout</button>
+          } @else {
+            <button class="btn btn-outline-light btn-sm ms-auto" (click)="auth.login()">
+              <i class="bi bi-box-arrow-in-right me-1"></i>Login
+            </button>
+          }
         </div>
       </div>
     </nav>
-
-    @if (showLogin() && !auth.isLoggedIn()) {
-      <div class="modal d-block" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" (click)="showLogin.set(false)">
-        <div class="modal-dialog" role="document" (click)="$event.stopPropagation()">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="loginModalLabel">Login to EventfindR</h5>
-              <button type="button" class="btn-close" aria-label="Close" (click)="showLogin.set(false)"></button>
-            </div>
-            <div class="modal-body">
-              <form (ngSubmit)="onLogin()">
-                <div class="mb-3">
-                  <label for="username" class="form-label">Username</label>
-                  <input type="text" class="form-control" id="username" [(ngModel)]="username" name="username" required>
-                </div>
-                <div class="mb-3">
-                  <label for="password" class="form-label">Password</label>
-                  <input type="password" class="form-control" id="password" [(ngModel)]="password" name="password" required>
-                </div>
-                <button type="submit" class="btn btn-primary w-100">Login</button>
-              </form>
-              <p class="text-muted small mt-3 text-center">
-                Use your Keycloak credentials to log in.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="modal-backdrop show"></div>
-    }
   `
 })
-export class NavbarComponent {
+export class NavbarComponent implements AfterViewInit, OnDestroy {
   readonly auth = inject(AuthService);
   readonly navOpen = signal(false);
-  readonly showLogin = signal(false);
-  username = '';
-  password = '';
 
-  onLogin(): void {
-    if (this.username && this.password) {
-      this.auth.login(this.username, this.password);
-      this.showLogin.set(false);
-      this.username = '';
-      this.password = '';
+  @ViewChild('navbarEl', { static: true }) private navbarEl?: ElementRef<HTMLElement>;
+
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly document = inject(DOCUMENT);
+  private readonly isBrowser = isPlatformBrowser(this.platformId);
+
+  private resizeObserver?: ResizeObserver;
+  private readonly onWindowResize = () => this.updateNavbarHeight();
+
+  ngAfterViewInit(): void {
+    if (!this.isBrowser || !this.navbarEl) {
+      return;
     }
+
+    this.updateNavbarHeight();
+
+    this.resizeObserver = new ResizeObserver(() => this.updateNavbarHeight());
+    this.resizeObserver.observe(this.navbarEl.nativeElement);
+    window.addEventListener('resize', this.onWindowResize, { passive: true });
+  }
+
+  ngOnDestroy(): void {
+    if (!this.isBrowser) {
+      return;
+    }
+
+    this.resizeObserver?.disconnect();
+    window.removeEventListener('resize', this.onWindowResize);
+  }
+
+  private updateNavbarHeight(): void {
+    const height = this.navbarEl?.nativeElement.getBoundingClientRect().height;
+    if (!height) {
+      return;
+    }
+
+    // Keep subpixel precision to avoid creating a visible 1px seam below the fixed navbar.
+    this.document.documentElement.style.setProperty('--app-navbar-height', `${height.toFixed(2)}px`);
   }
 }

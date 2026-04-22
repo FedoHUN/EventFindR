@@ -1,8 +1,11 @@
 import { Component, ChangeDetectionStrategy, inject, signal, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { DatePipe, CurrencyPipe } from '@angular/common';
 import { EventApi } from '../../../events/event-api';
 import { Event } from '../../../events/event.model';
+import { User } from '../../../../core/auth/auth.model';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-home',
@@ -13,9 +16,10 @@ import { Event } from '../../../events/event.model';
 })
 export class HomeComponent implements OnInit {
   private readonly eventApi = inject(EventApi);
+  private readonly http = inject(HttpClient);
 
   readonly featuredEvents = signal<Event[]>([]);
-  readonly organizers = signal<{ name: string; eventCount: number }[]>([]);
+  readonly organizers = signal<Partial<User>[]>([]);
   readonly loading = signal(true);
 
   ngOnInit(): void {
@@ -25,23 +29,16 @@ export class HomeComponent implements OnInit {
           new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime()
         );
         this.featuredEvents.set(sorted.slice(0, 6));
-
-        const orgMap = new Map<string, number>();
-        events.forEach(e => {
-          if (e.organizer?.name) {
-            orgMap.set(e.organizer.name, (orgMap.get(e.organizer.name) ?? 0) + 1);
-          }
-        });
-        const orgList = Array.from(orgMap.entries())
-          .map(([name, eventCount]) => ({ name, eventCount }))
-          .sort((a, b) => b.eventCount - a.eventCount)
-          .slice(0, 4);
-        this.organizers.set(orgList);
         this.loading.set(false);
       },
       error: () => {
         this.loading.set(false);
       }
+    });
+
+    this.http.get<Partial<User>[]>(`${environment.beUrl}/users/organizers`).subscribe({
+      next: (organizers) => this.organizers.set(organizers),
+      error: () => {}
     });
   }
 }

@@ -86,6 +86,25 @@ public class EventService implements EventFacade {
     }
 
     @Override
+    public void unattend(Long eventId, Long userId) {
+        EventAttendance attendance = eventAttendanceRepository.findByEventAndUser(eventId, userId)
+                .orElseThrow(() -> new EventfindrException(
+                        EventfindrException.Type.NOT_FOUND,
+                        "Účasť na evente nebola nájdená"));
+
+        eventAttendanceRepository.delete(attendance);
+    }
+
+    @Override
+    public AttendanceStatus getAttendanceStatus(Long eventId, Long userId) {
+        return eventAttendanceRepository.findByEventAndUser(eventId, userId)
+                .map(EventAttendance::getStatus)
+                .orElseThrow(() -> new EventfindrException(
+                        EventfindrException.Type.NOT_FOUND,
+                        "Účasť na evente nebola nájdená"));
+    }
+
+    @Override
     public Collection<EventAttendance> getAttendancesByUser(Long userId) {
         return eventAttendanceRepository.findByUser(userId);
     }

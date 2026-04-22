@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { isLoggedIn } from './core/auth/auth-guards';
 
 export const routes: Routes = [
   {
@@ -16,6 +17,11 @@ export const routes: Routes = [
   {
     path: 'about',
     loadComponent: () => import('./modules/about/pages/about/about').then(m => m.AboutComponent)
+  },
+  {
+    path: 'my-profile',
+    canActivate: [isLoggedIn],
+    loadComponent: () => import('./modules/profile/pages/my-profile/my-profile').then(m => m.MyProfileComponent)
   },
   {
     path: '**',

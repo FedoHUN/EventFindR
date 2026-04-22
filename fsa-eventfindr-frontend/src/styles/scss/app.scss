@@ -1,0 +1,115 @@
+// Variables (imported BEFORE Bootstrap so they override defaults)
+@import 'variables';
+
+// Bootstrap source
+@import 'bootstrap/bootstrap';
+
+// Bootstrap Icons
+@import 'bootstrap-icons/font/bootstrap-icons.css';
+
+// ── App-wide custom styles ──
+
+:root {
+  --ef-primary: #{$ef-primary};
+  --ef-primary-light: #{$ef-primary-light};
+  --ef-primary-dark: #{$ef-primary-dark};
+  --ef-primary-50: #{$ef-primary-50};
+  --ef-primary-200: #{$ef-primary-200};
+  --ef-primary-700: #{$ef-primary-700};
+  --ef-accent: #{$ef-accent};
+  --ef-accent-soft: #{$ef-accent-soft};
+  --ef-accent-strong: #{$ef-accent-strong};
+  --ef-bg: #{$ef-bg};
+  --ef-surface-warm: #{$ef-surface-warm};
+  --ef-border-subtle: #{$ef-border-subtle};
+  --ef-text: #{$ef-text};
+  --ef-text-muted: #{$ef-text-muted};
+  --ef-card-bg: #ffffff;
+  --app-navbar-height: 64px;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+.app-main-offset {
+  padding-top: calc(var(--app-navbar-height) - 0.5px);
+}
+
+a {
+  color: var(--ef-primary);
+  text-decoration: none;
+  &:hover {
+    color: var(--ef-primary-dark);
+  }
+}
+
+.btn-primary {
+  background-color: var(--ef-primary);
+  border-color: var(--ef-primary);
+  &:hover {
+    background-color: var(--ef-primary-dark);
+    border-color: var(--ef-primary-dark);
+  }
+}
+
+.btn-outline-primary {
+  color: var(--ef-primary);
+  border-color: var(--ef-primary);
+  &:hover {
+    background-color: var(--ef-primary);
+    border-color: var(--ef-primary);
+    color: #fff;
+  }
+}
+
+.text-primary {
+  color: var(--ef-primary) !important;
+}
+
+.bg-primary {
+  background-color: var(--ef-primary) !important;
+}
+
+.badge-attending {
+  background-color: #198754;
+  color: #fff;
+}
+
+.badge-watching {
+  background-color: var(--ef-accent);
+  color: #212529;
+}
+
+// EventfindR utility classes: .bg-ef-*, .text-ef-*, .border-ef-*
+$ef-theme-colors: (
+  'primary': $ef-primary,
+  'primary-light': $ef-primary-light,
+  'primary-dark': $ef-primary-dark,
+  'primary-50': $ef-primary-50,
+  'primary-200': $ef-primary-200,
+  'primary-700': $ef-primary-700,
+  'accent': $ef-accent,
+  'accent-soft': $ef-accent-soft,
+  'accent-strong': $ef-accent-strong,
+  'bg': $ef-bg,
+  'surface-warm': $ef-surface-warm,
+  'border-subtle': $ef-border-subtle,
+  'text': $ef-text,
+  'text-muted': $ef-text-muted
+);
+
+@each $name, $color in $ef-theme-colors {
+  .bg-ef-#{$name} {
+    background-color: $color !important;
+  }
+
+  .text-ef-#{$name} {
+    color: $color !important;
+  }
+
+  .border-ef-#{$name} {
+    border-color: $color !important;
+  }
+}

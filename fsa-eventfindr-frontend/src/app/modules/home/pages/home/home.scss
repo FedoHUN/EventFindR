@@ -1,5 +1,8 @@
 .hero-section {
-  background: linear-gradient(135deg, var(--ef-primary-dark), var(--ef-primary), var(--ef-primary-light));
+  /* Overlay keeps heading text readable on top of the hero image. */
+  background:
+    linear-gradient(rgba(14, 26, 42, 0.45), rgba(14, 26, 42, 0.45)),
+    url('/heroImage.jpg') center / cover no-repeat;
 }
 
 .event-card {

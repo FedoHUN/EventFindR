@@ -220,16 +220,16 @@ function Ensure-Client {
         name                      = $ClientId
         enabled                   = $true
         protocol                  = 'openid-connect'
-        publicClient              = $false
+        publicClient              = $true
         clientAuthenticatorType   = 'client-secret'
-        secret                    = $PreferredClientSecret
+        secret                    = $null
         standardFlowEnabled       = $true
-        directAccessGrantsEnabled = $true
+        directAccessGrantsEnabled = $false
         serviceAccountsEnabled    = $false
         implicitFlowEnabled       = $false
-        redirectUris              = @('*')
-        webOrigins                = @('*')
-        attributes                = @{ 'post.logout.redirect.uris' = '*' }
+        redirectUris              = @('http://localhost:4200/*')
+        webOrigins                = @('http://localhost:4200')
+        attributes                = @{ 'post.logout.redirect.uris' = 'http://localhost:4200/*' }
     }
 
     if ([string]::IsNullOrWhiteSpace($clientUuid)) {
@@ -245,8 +245,12 @@ function Ensure-Client {
         throw "Client $ClientId was not found after create/update."
     }
 
-    $secretPayload = Invoke-ApiGet -Path "/admin/realms/$RealmName/clients/$clientUuid/client-secret"
-    $script:ClientSecretValue = $secretPayload.value
+    if ($payload.publicClient) {
+        $script:ClientSecretValue = '<not-used-public-client>'
+    } else {
+        $secretPayload = Invoke-ApiGet -Path "/admin/realms/$RealmName/clients/$clientUuid/client-secret"
+        $script:ClientSecretValue = $secretPayload.value
+    }
 }
 
 function Get-UserId {

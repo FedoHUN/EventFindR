@@ -1,6 +1,9 @@
 package sk.eventfindr.fsa.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import sk.eventfindr.fsa.domain.Event;
 import sk.eventfindr.fsa.domain.User;
@@ -14,6 +17,7 @@ import sk.eventfindr.fsa.rest.dto.EventsResponseDto;
 import sk.eventfindr.fsa.security.CurrentUserDetailService;
 
 import java.util.Collection;
+import java.util.Map;
 
 @RestController
 public class EventRestController implements EventsApi {
@@ -58,5 +62,19 @@ public class EventRestController implements EventsApi {
         User user = currentUserDetailService.getFullCurrentUser();
         eventFacade.attend(id, user.getId(), request.getStatus().name());
         return ResponseEntity.status(201).build();
+    }
+
+    @GetMapping("/events/{id}/attend")
+    public ResponseEntity<Map<String, String>> getMyAttendance(@PathVariable("id") Long id) {
+        User user = currentUserDetailService.getFullCurrentUser();
+        String status = eventFacade.getAttendanceStatus(id, user.getId()).name();
+        return ResponseEntity.ok(Map.of("status", status));
+    }
+
+    @DeleteMapping("/events/{id}/attend")
+    public ResponseEntity<Void> unattendEvent(@PathVariable("id") Long id) {
+        User user = currentUserDetailService.getFullCurrentUser();
+        eventFacade.unattend(id, user.getId());
+        return ResponseEntity.noContent().build();
     }
 }

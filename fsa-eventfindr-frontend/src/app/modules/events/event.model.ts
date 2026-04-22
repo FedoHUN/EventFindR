@@ -31,6 +31,10 @@ export interface AttendEventRequest {
 
 export type AttendanceStatus = 'ATTENDING' | 'WATCHING';
 
+export interface AttendanceResponse {
+  status: AttendanceStatus;
+}
+
 export interface EventsResponse {
   events: Event[];
 }

@@ -42,10 +42,15 @@ class SecurityConfiguration {
     private void configureAuthorizationRules(AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry auth) {
         auth
                 .requestMatchers("/actuator/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/events/**", "/api/events/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/users", "/api/users").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.POST, "/events", "/api/events").hasAnyRole("ORGANIZER", "ADMIN")
-                .requestMatchers(HttpMethod.POST, "/events/*/attend", "/api/events/*/attend").hasAnyRole("USER", "ORGANIZER", "ADMIN")
+                .requestMatchers(HttpMethod.GET, "/users/me").hasAnyRole("USER", "ORGANIZER", "ADMIN")
+                .requestMatchers(HttpMethod.GET, "/users/organizers").permitAll()
+                .requestMatchers(HttpMethod.GET, "/events/*/attend").hasAnyRole("USER", "ORGANIZER", "ADMIN")
+                .requestMatchers(HttpMethod.GET, "/events/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/users/me/become-organizer").hasAnyRole("USER", "ORGANIZER", "ADMIN")
+                .requestMatchers(HttpMethod.POST, "/users").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/events").hasAnyRole("ORGANIZER", "ADMIN")
+                .requestMatchers(HttpMethod.POST, "/events/*/attend").hasAnyRole("USER", "ORGANIZER", "ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/events/*/attend").hasAnyRole("USER", "ORGANIZER", "ADMIN")
                 .anyRequest().authenticated();
     }
 
