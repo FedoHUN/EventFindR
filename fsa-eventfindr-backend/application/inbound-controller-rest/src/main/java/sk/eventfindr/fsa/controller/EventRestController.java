@@ -6,7 +6,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import sk.eventfindr.fsa.domain.Event;
+import sk.eventfindr.fsa.domain.EventfindrException;
 import sk.eventfindr.fsa.domain.User;
+import sk.eventfindr.fsa.domain.UserRole;
 import sk.eventfindr.fsa.domain.service.EventFacade;
 import sk.eventfindr.fsa.mapper.EventMapper;
 import sk.eventfindr.fsa.rest.api.EventsApi;
@@ -51,6 +53,11 @@ public class EventRestController implements EventsApi {
     @Override
     public ResponseEntity<Void> createEvent(CreateEventRequestDto request) {
         User organizer = currentUserDetailService.getFullCurrentUser();
+        if (organizer.getRola() != UserRole.ORGANIZER && organizer.getRola() != UserRole.ADMIN) {
+            throw new EventfindrException(
+                    EventfindrException.Type.FORBIDDEN,
+                    "Only organizers can create events");
+        }
         Event event = eventMapper.toEntity(request);
         event.setOrganizer(organizer);
         eventFacade.create(event);

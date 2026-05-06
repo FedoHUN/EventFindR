@@ -8,6 +8,7 @@ import { environment } from '../../../environments/environment';
 export class EventApi {
   private readonly http = inject(HttpClient);
   private readonly _url = environment.beUrl + '/events';
+  private readonly storagePrefix = 'ef_events_';
 
   getAllEvents(): Observable<Event[]> {
     return this.http.get<EventsResponse>(this._url).pipe(
@@ -36,5 +37,45 @@ export class EventApi {
 
   removeAttendance(eventId: number): Observable<void> {
     return this.http.delete<void>(`${this._url}/${eventId}/attend`);
+  }
+
+  // --- Local-only helpers for organizer actions (stored in browser localStorage).
+  private readLocalMap(key: string): Record<string, boolean> {
+    try {
+      const raw = localStorage.getItem(this.storagePrefix + key);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  private writeLocalMap(key: string, map: Record<string, boolean>): void {
+    try {
+      localStorage.setItem(this.storagePrefix + key, JSON.stringify(map));
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  isCanceled(eventId: number): boolean {
+    const map = this.readLocalMap('canceled');
+    return !!map[eventId];
+  }
+
+  toggleCanceled(eventId: number): void {
+    const map = this.readLocalMap('canceled');
+    map[eventId] = !map[eventId];
+    this.writeLocalMap('canceled', map);
+  }
+
+  isDeleted(eventId: number): boolean {
+    const map = this.readLocalMap('deleted');
+    return !!map[eventId];
+  }
+
+  markDeleted(eventId: number): void {
+    const map = this.readLocalMap('deleted');
+    map[eventId] = true;
+    this.writeLocalMap('deleted', map);
   }
 }

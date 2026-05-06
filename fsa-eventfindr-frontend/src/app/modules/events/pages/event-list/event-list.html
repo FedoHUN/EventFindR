@@ -74,7 +74,12 @@
               </div>
             }
             <div class="card-body d-flex flex-column">
-              <h5 class="card-title fw-bold">{{ event.name }}</h5>
+              <h5 class="card-title fw-bold">
+                {{ event.name }}
+                @if (eventApi.isCanceled(event.id)) {
+                  <span class="badge bg-danger ms-2">Canceled</span>
+                }
+              </h5>
               @if (event.performers) {
                 <p class="text-muted small mb-1">
                   <i class="bi bi-mic me-1"></i>{{ event.performers }}

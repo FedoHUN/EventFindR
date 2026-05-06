@@ -15,7 +15,7 @@
 	<description>EventfindR - platforma na vyhľadávanie a sledovanie eventov</description>
 	<packaging>pom</packaging>
 	<properties>
-		<java.version>25</java.version>
+		<java.version>21</java.version>
 		<org.mapstruct.version>1.6.3</org.mapstruct.version>
 	</properties>
 	<modules>

@@ -45,6 +45,16 @@ import { AuthService } from '../../auth/auth';
             <li class="nav-item">
               <a class="nav-link" routerLink="/about" routerLinkActive="active">About Us</a>
             </li>
+            @if (auth.isOrganizer()) {
+              <li class="nav-item">
+                <a class="nav-link" routerLink="/events/create" routerLinkActive="active">
+                  <i class="bi bi-plus-circle me-1"></i>Create Event
+                </a>
+              </li>
+                <li class="nav-item">
+                  <a class="nav-link" routerLink="/events/my" routerLinkActive="active">My Events</a>
+                </li>
+            }
             @if (auth.user()) {
               <li class="nav-item">
                 <a class="nav-link" routerLink="/my-profile" routerLinkActive="active">My Profile</a>

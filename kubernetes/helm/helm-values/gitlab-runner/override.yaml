@@ -1,0 +1,76 @@
+# =============================================================================
+# GitLab Runner — EventfindR Settings (chart 0.87.0)
+#
+# Obsahuje LEN zmeny oproti defaults.
+# =============================================================================
+
+## GitLab instance URL
+gitlabUrl: https://gitlab.fullstackacademy.sk
+
+## Polling interval — 30s namiesto defaultnych 3s
+checkInterval: 30
+
+## Čitateľný log formát
+logFormat: text
+
+## RBAC — runner potrebuje permissions na K8s
+rbac:
+  create: true
+  rules:
+    - resources: ["events"]
+      verbs: ["list", "watch"]
+    - resources: ["namespaces"]
+      verbs: ["create", "delete"]
+    - resources: ["pods"]
+      verbs: ["create", "delete", "get"]
+    - apiGroups: [""]
+      resources: ["pods/attach", "pods/exec"]
+      verbs: ["get", "create", "patch", "delete"]
+    - apiGroups: [""]
+      resources: ["pods/log"]
+      verbs: ["get", "list"]
+    - resources: ["secrets"]
+      verbs: ["create", "delete", "get", "update"]
+    - resources: ["serviceaccounts"]
+      verbs: ["get"]
+    - resources: ["services"]
+      verbs: ["create", "get"]
+
+## Service pre metrics
+service:
+  enabled: true
+  type: ClusterIP
+
+## Secret s runner tokenom — bude zalomený z CLI
+runners:
+  secret: gitlab-runner-secret
+
+  ## Konfigurácia kubernetes executora
+  config: |
+    [[runners]]
+      environment = ["DOCKER_HOST=tcp://127.0.0.1:2375"]
+      [runners.kubernetes]
+        namespace = "{{.Release.Namespace}}"
+        image = "ubuntu:16.04"
+        pull_policy = "always"
+        privileged = true
+        output_limit = 100096
+        poll_timeout = 400
+        cpu_request = "100m"
+        memory_request = "128Mi"
+        cpu_limit = "500m"
+        memory_limit = "1024Mi"
+        service_cpu_request = "100m"
+        service_memory_request = "128Mi"
+        service_cpu_limit = "500m"
+        service_memory_limit = "1024Mi"
+        helper_cpu_request = "100m"
+        helper_memory_request = "128Mi"
+        helper_cpu_limit = "500m"
+        helper_memory_limit = "1024Mi"
+
+## Docker-in-Docker env
+envVars:
+  - name: DOCKER_HOST
+    value: tcp://127.0.0.1:2375
+

@@ -1,2 +1,18 @@
 .idea
 .claude
+
+# AI-generated and support documentation (not part of production code)
+DEVOPS-SETUP.md
+DEVOPS-CHECKLIST.md
+DEVOPS-INDEX.md
+DEVOPS-MANIFEST.md
+GET-STARTED.md
+INDEX.md
+JAVA_VERSION_ALIGNMENT.md
+QUICKSTART.md
+READY.md
+TLDR.md
+README-attendance-toggle.md
+
+# Example projects (reference only, not deployed)
+example/

@@ -1,0 +1,53 @@
+stages:
+  - build
+  # - deploy  # Uncomment keď máš pripraveného GitLab Runnera
+
+variables:
+  IMAGE_NAME: "fsa-eventfindr-frontend"
+  DOCKER_DRIVER: overlay2
+  DOCKER_HOST: tcp://127.0.0.1:2375
+  DOCKER_TLS_VERIFY: ""
+  DOCKER_TLS_CERTDIR: ""
+
+# Build stage — zbuild Docker image a push do ACR
+build:
+  stage: build
+  tags:
+    - fsa
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    - until docker info &>/dev/null; do sleep 2 && echo "Čakam na Docker daemon..."; done
+    - export IMAGE_VERSION="${CI_JOB_ID}-${CI_COMMIT_SHORT_SHA}"
+  script:
+    # Login do ACR
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin "https://$ACR_REGISTRY"
+
+    # Build images — tagged as version a latest
+    - docker build -t "$ACR_REGISTRY/$IMAGE_NAME:$IMAGE_VERSION" -t "$ACR_REGISTRY/$IMAGE_NAME:latest" .
+
+    # Push do ACR
+    - docker push "$ACR_REGISTRY/$IMAGE_NAME:$IMAGE_VERSION"
+    - docker push "$ACR_REGISTRY/$IMAGE_NAME:latest"
+  only:
+    - main
+
+# Deploy stage — update Kubernetes deployment
+# UNLOCK keď máš GitLab Runner a KUBECONFIG_BASE64 nastaveného
+# deploy:
+#   stage: deploy
+#   tags:
+#     - fsa
+#   image: alpine/k8s:1.32.3
+#   before_script:
+#     - mkdir -p ~/.kube
+#     - echo "$KUBECONFIG_BASE64" | base64 -d > ~/.kube/config
+#   script:
+#     # Update Kubernetes deployment — pull latest image
+#     - kubectl set image deployment/eventfindr-fe eventfindr-fe=$ACR_REGISTRY/$IMAGE_NAME:latest -n app
+#     # Čakaj kým rollout skončí
+#     - kubectl rollout status deployment/eventfindr-fe -n app
+#   only:
+#     - main
+

@@ -1,0 +1,139 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-realm-fsa
+  namespace: app
+  annotations:
+    description: "FSA Realm configuration for Keycloak (based on PosAM production config)"
+data:
+  realm-fsa.json: |
+    {
+      "id": "fsa-realm-001",
+      "realm": "FSA",
+      "displayName": "FSA Workshop",
+      "notBefore": 0,
+      "revokeRefreshToken": false,
+      "refreshTokenMaxReuse": 0,
+      "accessTokenLifespan": 300,
+      "accessCodeLifespan": 60,
+      "accessCodeLifespanUserAction": 300,
+      "actionTokenGeneratedByAdminLifespan": 43200,
+      "actionTokenGeneratedByUserLifespan": 300,
+      "enabled": true,
+      "sslRequired": "external",
+      "registrationAllowed": false,
+      "rememberMe": false,
+      "verifyEmail": false,
+      "loginWithEmailAllowed": true,
+      "duplicateEmailsAllowed": false,
+      "roles": {
+        "realm": [
+          {
+            "name": "admin",
+            "description": "Administrator role - full access to EventfindR",
+            "composite": false,
+            "clientRole": false
+          },
+          {
+            "name": "organizer",
+            "description": "Event organizer - can create and manage events",
+            "composite": false,
+            "clientRole": false
+          },
+          {
+            "name": "user",
+            "description": "Regular user - can browse and attend events",
+            "composite": false,
+            "clientRole": false
+          }
+        ]
+      },
+      "users": [
+        {
+          "username": "admin",
+          "firstName": "Admin",
+          "lastName": "EventfindR",
+          "email": "admin@eventfindr.sk",
+          "enabled": true,
+          "emailVerified": true,
+          "credentials": [
+            {
+              "type": "password",
+              "value": "admin123"
+            }
+          ],
+          "realmRoles": ["admin", "organizer", "user"]
+        },
+        {
+          "username": "organizer1",
+          "firstName": "John",
+          "lastName": "Organizer",
+          "email": "organizer@eventfindr.sk",
+          "enabled": true,
+          "emailVerified": true,
+          "credentials": [
+            {
+              "type": "password",
+              "value": "organizer123"
+            }
+          ],
+          "realmRoles": ["organizer", "user"]
+        },
+        {
+          "username": "user1",
+          "firstName": "Anna",
+          "lastName": "Attendee",
+          "email": "user@eventfindr.sk",
+          "enabled": true,
+          "emailVerified": true,
+          "credentials": [
+            {
+              "type": "password",
+              "value": "user123"
+            }
+          ],
+          "realmRoles": ["user"]
+        }
+      ],
+      "clients": [
+        {
+          "clientId": "fsa-client",
+          "name": "FSA EventfindR Client",
+          "description": "Frontend and backend OAuth2 client",
+          "enabled": true,
+          "publicClient": true,
+          "directAccessGrantsEnabled": true,
+          "standardFlowEnabled": true,
+          "implicitFlowEnabled": false,
+          "serviceAccountsEnabled": false,
+          "authorizationServicesEnabled": false,
+          "frontchannelLogout": false,
+          "protocol": "openid-connect",
+          "alwaysDisplayInConsole": true,
+          "redirectUris": [
+            "http://localhost:4200/auth/callback",
+            "http://localhost:4200/*",
+            "https://localhost:4200/auth/callback",
+            "https://localhost:4200/*"
+          ],
+          "webOrigins": [
+            "http://localhost:4200",
+            "https://localhost:4200"
+          ],
+          "defaultClientScopes": [
+            "web-origins",
+            "acr",
+            "roles",
+            "profile",
+            "email"
+          ],
+          "optionalClientScopes": [
+            "address",
+            "phone",
+            "offline_access",
+            "microprofile-jwt"
+          ]
+        }
+      ]
+    }
+

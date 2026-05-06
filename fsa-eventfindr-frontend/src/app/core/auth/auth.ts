@@ -2,6 +2,7 @@ import { inject, Injectable, signal, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { OAuthService } from 'angular-oauth2-oidc';
+import { firstValueFrom } from 'rxjs';
 import { User, UserRole } from './auth.model';
 import { authCodeFlowConfig } from './oidc.config';
 import { environment } from '../../../environments/environment';
@@ -29,6 +30,26 @@ export class AuthService {
     });
 
     this.tryLogin();
+  }
+
+  /**
+   * Explicitly request the user's role from the backend and update the local user signal.
+   * This method returns the resolved role (or undefined on error) — useful for guards
+   * which need the authoritative role immediately after login.
+   */
+  async getRoleFromBackend(): Promise<UserRole | undefined> {
+    if (!this.oauthService.hasValidAccessToken()) return undefined;
+
+    try {
+      const dbUser = await firstValueFrom(this.http.get<{ rola: UserRole }>(`${environment.beUrl}/users/me`));
+      const current = this._currentUser();
+      if (current && dbUser?.rola) {
+        this._currentUser.set({ ...current, rola: dbUser.rola });
+      }
+      return dbUser?.rola;
+    } catch (e) {
+      return undefined;
+    }
   }
 
   login() {

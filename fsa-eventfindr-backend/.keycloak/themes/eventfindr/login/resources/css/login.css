@@ -1,0 +1,164 @@
+/* EventfindR Keycloak Login Theme */
+
+:root {
+  --ef-primary: #6f42c1;
+  --ef-primary-light: #8b5cf6;
+  --ef-primary-dark: #5b21b6;
+  --ef-bg: #f8f9fa;
+  --ef-text: #212529;
+  --ef-border-subtle: #e9dffb;
+}
+
+/* Page background */
+.login-pf body,
+body.kc-login {
+  background: linear-gradient(135deg, var(--ef-primary-dark) 0%, var(--ef-primary) 50%, var(--ef-primary-light) 100%) !important;
+  font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Background image area */
+#kc-login-page,
+#kc-bg-section,
+.login-pf .container-fluid {
+  background: transparent !important;
+}
+
+/* Center the login card */
+#kc-form-wrapper,
+#kc-content-wrapper {
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+/* Login card styling */
+#kc-form-login,
+.card-pf,
+#kc-content,
+#kc-form {
+  background-color: #ffffff !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2) !important;
+  border: none !important;
+  padding: 2rem !important;
+}
+
+/* Header / title area */
+#kc-header-wrapper,
+#kc-page-title {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+  font-size: 1.5rem !important;
+  padding-bottom: 1rem !important;
+}
+
+#kc-header {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Form labels */
+#kc-form label,
+.control-label,
+.pf-c-form__label-text {
+  color: var(--ef-text) !important;
+  font-weight: 600 !important;
+  font-size: 0.9rem !important;
+}
+
+/* Input fields */
+#kc-form input[type="text"],
+#kc-form input[type="password"],
+#kc-form input[type="email"],
+.pf-c-form-control {
+  border: 2px solid var(--ef-border-subtle) !important;
+  border-radius: 8px !important;
+  padding: 0.6rem 1rem !important;
+  font-size: 1rem !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+  background-color: #fff !important;
+}
+
+#kc-form input[type="text"]:focus,
+#kc-form input[type="password"]:focus,
+#kc-form input[type="email"]:focus,
+.pf-c-form-control:focus {
+  border-color: var(--ef-primary) !important;
+  box-shadow: 0 0 0 3px rgba(111, 66, 193, 0.15) !important;
+  outline: none !important;
+}
+
+/* Primary button (Sign In) */
+#kc-login,
+input[type="submit"].pf-c-button--primary,
+.pf-c-button.pf-m-primary,
+.btn-primary {
+  background-color: var(--ef-primary) !important;
+  border-color: var(--ef-primary) !important;
+  border-radius: 8px !important;
+  padding: 0.65rem 1.5rem !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+  text-transform: none !important;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease !important;
+  width: 100% !important;
+  cursor: pointer !important;
+}
+
+#kc-login:hover,
+input[type="submit"].pf-c-button--primary:hover,
+.pf-c-button.pf-m-primary:hover,
+.btn-primary:hover {
+  background-color: var(--ef-primary-dark) !important;
+  border-color: var(--ef-primary-dark) !important;
+  box-shadow: 0 4px 12px rgba(91, 33, 182, 0.3) !important;
+}
+
+/* Links */
+#kc-form a,
+#kc-registration a,
+.kc-social-links a,
+a.pf-c-button.pf-m-link {
+  color: var(--ef-primary) !important;
+  text-decoration: none !important;
+  font-weight: 500 !important;
+}
+
+#kc-form a:hover,
+#kc-registration a:hover,
+a.pf-c-button.pf-m-link:hover {
+  color: var(--ef-primary-dark) !important;
+  text-decoration: underline !important;
+}
+
+/* "Remember me" checkbox area */
+#kc-form-options {
+  font-size: 0.85rem !important;
+  color: var(--ef-text) !important;
+}
+
+/* Alert / error messages */
+.alert,
+.pf-c-alert,
+.kc-feedback-text {
+  border-radius: 8px !important;
+  font-size: 0.9rem !important;
+}
+
+.alert-error,
+.pf-m-danger {
+  background-color: #fef2f2 !important;
+  border-color: #fca5a5 !important;
+  color: #991b1b !important;
+}
+
+/* Hide the default Keycloak logo */
+div.kc-logo-text {
+  display: none !important;
+}
+
+/* Registration link area */
+#kc-registration {
+  text-align: center !important;
+  margin-top: 1rem !important;
+}

@@ -1,0 +1,88 @@
+# =============================================================================
+# Keycloak (keycloakx) — EventfindR nastavenia (chart 7.1.9 / KC 26.5.5)
+#
+# Tu sú LEN hodnoty, ktoré sa líšia od defaults.
+#
+# Prerekvizity (aplikuj pred helm install):
+#   kubectl apply -f keycloak-java-config.yaml
+#   kubectl apply -f realm-fsa-configmap.yaml
+#
+# =============================================================================
+
+## Fixný názov releasu — service bude fsa-keycloak-http (matchuje ingress)
+fullnameOverride: "fsa-keycloak"
+
+## Príkaz na spustenie KC 26 — HTTP mode, import realm pri prvom štarte
+command:
+  - "/opt/keycloak/bin/kc.sh"
+  - "--verbose"
+  - "start"
+  - "--http-enabled=true"
+  - "--http-port=8080"
+  - "--hostname-strict=false"
+  - "--import-realm"
+
+## Resource limity
+resources:
+  requests:
+    cpu: "250m"
+    memory: "512Mi"
+  limits:
+    cpu: "500m"
+    memory: "1024Mi"
+
+## Env premenné — JVM tuning + admin credentials z secretu
+extraEnv: |
+  - name: JAVA_OPTS
+    value: >-
+      -Xms256m
+      -Xmx2048m
+      -XX:MetaspaceSize=96M
+      -XX:MaxMetaspaceSize=256m
+      -Djava.net.preferIPv4Stack=true
+      -Djava.awt.headless=true
+  ## Bootstrap admin pre master realm — KC 26+ pouziva KC_BOOTSTRAP_ADMIN_*
+  - name: KC_BOOTSTRAP_ADMIN_USERNAME
+    value: admin
+  - name: KC_BOOTSTRAP_ADMIN_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: keycloak-secret
+        key: kc_password
+  - name: JAVA_OPTS_APPEND
+    value: "-Djgroups.dns.query={{ include "keycloak.fullname" . }}-headless"
+
+## Volumes — Azure PostgreSQL cert fix + FSA realm import
+extraVolumes: |
+  - name: keycloak-java-config
+    configMap:
+      name: keycloak-java-config
+  - name: keycloak-realm-fsa
+    configMap:
+      name: keycloak-realm-fsa
+
+extraVolumeMounts: |
+  - name: keycloak-java-config
+    mountPath: /etc/crypto-policies/back-ends/java.config
+    subPath: java.config
+  - name: keycloak-realm-fsa
+    mountPath: /opt/keycloak/data/import/realm-fsa.json
+    subPath: realm-fsa.json
+
+## Databáza — Azure PostgreSQL Flexible Server
+## POZOR: Zameniaj hostname za psql-fsa-<your-prefix>.postgres.database.azure.com
+database:
+  existingSecret: "postgres-secret"
+  existingSecretKey: "db_password"
+  vendor: postgres
+  hostname: psql-fsa-vojtkom.postgres.database.azure.com
+  port: 5432
+  database: keycloak
+  username: fsaadmin
+
+## Proxy — KC beží za nginx ingress (TLS terminuje ingress)
+## KC 26+: "edge" je neplatné — nginx posiela X-Forwarded-* hlavičky → xforwarded
+proxy:
+  enabled: true
+  mode: xforwarded
+

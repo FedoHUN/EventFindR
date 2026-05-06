@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { isLoggedIn } from './core/auth/auth-guards';
+import { isLoggedIn, isOrganizer } from './core/auth/auth-guards';
 
 export const routes: Routes = [
   {
@@ -9,6 +9,16 @@ export const routes: Routes = [
   {
     path: 'events',
     loadComponent: () => import('./modules/events/pages/event-list/event-list').then(m => m.EventListComponent)
+  },
+  {
+    path: 'events/my',
+    canActivate: [isOrganizer],
+    loadComponent: () => import('./modules/events/pages/my-events/my-events').then(m => m.MyEventsComponent)
+  },
+  {
+    path: 'events/create',
+    canActivate: [isOrganizer],
+    loadComponent: () => import('./modules/events/pages/event-create/event-create').then(m => m.EventCreateComponent)
   },
   {
     path: 'events/:id',

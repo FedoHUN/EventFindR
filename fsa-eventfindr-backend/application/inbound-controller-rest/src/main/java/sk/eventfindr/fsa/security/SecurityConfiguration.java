@@ -48,7 +48,7 @@ class SecurityConfiguration {
                 .requestMatchers(HttpMethod.GET, "/events/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/users/me/become-organizer").hasAnyRole("USER", "ORGANIZER", "ADMIN")
                 .requestMatchers(HttpMethod.POST, "/users").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.POST, "/events").hasAnyRole("ORGANIZER", "ADMIN")
+                .requestMatchers(HttpMethod.POST, "/events").hasAnyRole("USER", "ORGANIZER", "ADMIN")
                 .requestMatchers(HttpMethod.POST, "/events/*/attend").hasAnyRole("USER", "ORGANIZER", "ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/events/*/attend").hasAnyRole("USER", "ORGANIZER", "ADMIN")
                 .anyRequest().authenticated();

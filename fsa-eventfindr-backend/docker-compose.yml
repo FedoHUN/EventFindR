@@ -22,6 +22,8 @@ services:
     command: ["start-dev"]
     ports:
       - "8081:8080"
+    volumes:
+      - ./.keycloak/themes/eventfindr:/opt/keycloak/themes/eventfindr
     networks:
       - eventfindr-network
 

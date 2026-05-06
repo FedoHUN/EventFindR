@@ -177,11 +177,18 @@ function Ensure-Realm {
         $status = 404
     }
 
+    $realmPayload = @{
+        realm      = $RealmName
+        enabled    = $true
+        loginTheme = 'eventfindr'
+    }
+
     if ($status -eq 404) {
         Write-Log "Creating realm $RealmName."
-        Invoke-ApiPost -Path '/admin/realms' -Payload @{ realm = $RealmName; enabled = $true }
+        Invoke-ApiPost -Path '/admin/realms' -Payload $realmPayload
     } elseif ($status -eq 200) {
-        Write-Log "Realm $RealmName already exists, reusing."
+        Write-Log "Realm $RealmName already exists, updating theme."
+        Invoke-ApiPut -Path "/admin/realms/$RealmName" -Payload $realmPayload
     } else {
         throw "Unexpected realm status code: $status"
     }

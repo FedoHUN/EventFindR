@@ -13,7 +13,7 @@ import { Event } from '../../event.model';
   styleUrl: './event-list.scss'
 })
 export class EventListComponent implements OnInit {
-  private readonly eventApi = inject(EventApi);
+  readonly eventApi = inject(EventApi);
 
   readonly allEvents = signal<Event[]>([]);
   readonly loading = signal(true);
@@ -51,6 +51,9 @@ export class EventListComponent implements OnInit {
         return eventDate.toDateString() === filterDate.toDateString();
       });
     }
+
+    // filter out events that were locally marked as deleted by the organizer
+    events = events.filter(e => !this.eventApi.isDeleted(e.id));
 
     return events.sort((a, b) =>
       new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime()

@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-java-config
+  namespace: app
+data:
+  # Fix pre Azure PostgreSQL — FIPS cert issue
+  java.config: |
+    jdk.tls.disabledAlgorithms=
+
