@@ -17,13 +17,13 @@ spec:
   # TLS certificate — Let's Encrypt
   tls:
   - hosts:
-      - app.<IP>.nip.io
-      - keycloak.<IP>.nip.io
+      - app.20.223.129.102.nip.io
+      - keycloak.20.223.129.102.nip.io
     secretName: eventfindr-tls-nip
   
   rules:
     # Frontend aplikácia
-    - host: app.<IP>.nip.io
+    - host: app.20.223.129.102.nip.io
       http:
         paths:
           # Root — servuje Angular aplikáciu
@@ -70,7 +70,7 @@ spec:
                   number: 80
 
     # Keycloak — separate host
-    - host: keycloak.<IP>.nip.io
+    - host: keycloak.20.223.129.102.nip.io
       http:
         paths:
           - path: /

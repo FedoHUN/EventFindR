@@ -20,7 +20,7 @@ spec:
       containers:
         - name: eventfindr-fe
           # Zameni acrfsa<your-prefix> za tvoj ACR registry
-          image: acrfsa<your-prefix>.azurecr.io/fsa-eventfindr-frontend:latest
+          image: acrfsavojtkom.azurecr.io/fsa-eventfindr-frontend:latest
           imagePullPolicy: Always
           resources:
             limits:

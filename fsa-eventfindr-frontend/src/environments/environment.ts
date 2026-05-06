@@ -1,5 +1,5 @@
 export const environment = {
-  keyCloakUrl: 'https://eventfindr.local/auth',
-  beUrl: 'https://eventfindr.local',
-  appUrl: 'https://eventfindr.local',
+  keyCloakUrl: 'https://keycloak.20.223.129.102.nip.io/auth',
+  beUrl: 'https://app.20.223.129.102.nip.io',
+  appUrl: 'https://app.20.223.129.102.nip.io',
 };

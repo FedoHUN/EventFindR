@@ -14,5 +14,16 @@ READY.md
 TLDR.md
 README-attendance-toggle.md
 
+# kubectl export dumps
+eventfindr-be.yaml
+
+# Environment / secrets (never commit real credentials)
+.env
+*.env.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
 # Example projects (reference only, not deployed)
 example/

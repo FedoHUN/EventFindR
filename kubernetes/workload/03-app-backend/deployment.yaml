@@ -20,7 +20,7 @@ spec:
       containers:
         - name: eventfindr-be
           # Zameni acrfsa<your-prefix> za tvoj ACR registry
-          image: acrfsa<your-prefix>.azurecr.io/fsa-eventfindr-backend:latest
+          image: acrfsavojtkom.azurecr.io/fsa-eventfindr-backend:latest
           imagePullPolicy: Always
           env:
             # Database credentials z K8s secrets
@@ -42,17 +42,18 @@ spec:
             # Keycloak OIDC configuration
             # Zameni <IP> za IP adresu ingress-nginx v nip.io časti
             - name: ISSUER_URI
-              value: https://keycloak.<IP>.nip.io/auth/realms/FSA
+              value: https://keycloak.20.223.129.102.nip.io/realms/EventfindR
             - name: JWT_URI
-              value: https://keycloak.<IP>.nip.io/auth/realms/FSA/protocol/openid-connect/certs
+              value: https://keycloak.20.223.129.102.nip.io/realms/EventfindR/protocol/openid-connect/certs
             # Spring Boot JAVA_OPTS
             - name: JAVA_OPTS
               value: >-
-                -Dspring.datasource.url=jdbc:postgresql://${DB_URL}:5432/eventfindr-db
+                -Dspring.profiles.active=keycloak
+                -Dspring.datasource.url=jdbc:postgresql://${DB_URL}:5432/fsa-db
                 -Dspring.datasource.username=${DB_USERNAME}
                 -Dspring.datasource.password=${DB_PASSWORD}
                 -Dspring.security.oauth2.resourceserver.jwt.issuer-uri=${ISSUER_URI}
-                -Dspring.security.oauth2.resourceserver.jwt.jwk-uri=${JWT_URI}
+                -Dspring.security.oauth2.resourceserver.jwt.jwk-set-uri=${JWT_URI}
           resources:
             limits:
               cpu: 500m

@@ -7,6 +7,8 @@ import sk.eventfindr.fsa.domain.User;
 import sk.eventfindr.fsa.domain.service.UserFacade;
 import sk.eventfindr.fsa.rest.dto.UserDto;
 
+import sk.eventfindr.fsa.domain.UserRole;
+
 import java.util.List;
 
 @Service
@@ -36,12 +38,16 @@ public class CurrentUserDetailService {
     }
 
     public User getFullCurrentUser() {
-        User user = userFacade.get(getUserEmail());
+        UserDto jwt = getCurrentUser();
+        User user = userFacade.get(jwt.getEmail());
         if (user == null) {
-            throw new EventfindrException(
-                    EventfindrException.Type.UNAUTHORIZED,
-                    "Authenticated user not available in local user repository",
-                    List.of("email=" + getUserEmail()));
+            // Auto-register user from Keycloak JWT on first login
+            User newUser = new User();
+            newUser.setEmail(jwt.getEmail());
+            newUser.setName(jwt.getName());
+            newUser.setRola(jwt.getRola() != null ? UserRole.valueOf(jwt.getRola().name()) : UserRole.USER);
+            userFacade.create(newUser);
+            user = userFacade.get(jwt.getEmail());
         }
         return user;
     }
