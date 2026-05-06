@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eventfindr-fe
+  namespace: app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: eventfindr-fe
+  template:
+    metadata:
+      labels:
+        app: eventfindr-fe
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9113"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+        - name: eventfindr-fe
+          # Zameni acrfsa<your-prefix> za tvoj ACR registry
+          image: acrfsa<your-prefix>.azurecr.io/fsa-eventfindr-frontend:latest
+          imagePullPolicy: Always
+          resources:
+            limits:
+              cpu: 250m
+              memory: 250Mi
+            requests:
+              cpu: 150m
+              memory: 150Mi
+          ports:
+            - name: http
+              containerPort: 80
+          # Health checks zakomentované
+          # livenessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http
+          # readinessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http
+
+        # Prometheus exporter pre Nginx metrics
+        - name: nginx-exporter
+          image: nginx/nginx-prometheus-exporter:1.3
+          args:
+            - --nginx.scrape-uri=http://localhost:8080/stub_status
+          ports:
+            - name: metrics
+              containerPort: 9113
+          resources:
+            limits:
+              cpu: 50m
+              memory: 32Mi
+            requests:
+              cpu: 10m
+              memory: 16Mi
+

@@ -1,0 +1,14 @@
+# cert-manager — EventfindR override values
+# Containuje ĽUBOVOLNÉ zmeny oproti default values
+
+# Namespace pre cert-manager deployment
+namespace: "cert-manager"
+
+# Automaticka instalacia CRDs spolu s helm chartom
+crds:
+  enabled: true
+
+# Prometheus monitoring — vypnute (workshop nema potrebu monitoringu)
+prometheus:
+  enabled: false
+

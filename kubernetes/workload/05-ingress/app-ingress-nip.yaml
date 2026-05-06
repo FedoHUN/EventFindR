@@ -1,0 +1,83 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: eventfindr-ingress-nip
+  namespace: app
+  annotations:
+    # cert-manager — automatic SSL/TLS certificates via Let's Encrypt
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    
+    # Buffer size pre väčších requestov
+    nginx/client_max_body_size: 10m
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "256k"
+spec:
+  ingressClassName: nginx
+  # TLS certificate — Let's Encrypt
+  tls:
+  - hosts:
+      - app.<IP>.nip.io
+      - keycloak.<IP>.nip.io
+    secretName: eventfindr-tls-nip
+  
+  rules:
+    # Frontend aplikácia
+    - host: app.<IP>.nip.io
+      http:
+        paths:
+          # Root — servuje Angular aplikáciu
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: eventfindr-fe
+                port:
+                  number: 80
+          
+          # Backend API — EventfindR endpoints
+          - path: /events
+            pathType: Prefix
+            backend:
+              service:
+                name: eventfindr-be
+                port:
+                  number: 8080
+          
+          - path: /users
+            pathType: Prefix
+            backend:
+              service:
+                name: eventfindr-be
+                port:
+                  number: 8080
+          
+          - path: /actuator
+            pathType: Prefix
+            backend:
+              service:
+                name: eventfindr-be
+                port:
+                  number: 8080
+          
+          # Keycloak auth proxy (ak je potrebné)
+          - path: /auth
+            pathType: Prefix
+            backend:
+              service:
+                name: fsa-keycloak-http
+                port:
+                  number: 80
+
+    # Keycloak — separate host
+    - host: keycloak.<IP>.nip.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: fsa-keycloak-http
+                port:
+                  number: 80
+

@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eventfindr-be
+  namespace: app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: eventfindr-be
+  template:
+    metadata:
+      labels:
+        app: eventfindr-be
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      containers:
+        - name: eventfindr-be
+          # Zameni acrfsa<your-prefix> za tvoj ACR registry
+          image: acrfsa<your-prefix>.azurecr.io/fsa-eventfindr-backend:latest
+          imagePullPolicy: Always
+          env:
+            # Database credentials z K8s secrets
+            - name: DB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: db_url
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: db_username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: db_password
+            # Keycloak OIDC configuration
+            # Zameni <IP> za IP adresu ingress-nginx v nip.io časti
+            - name: ISSUER_URI
+              value: https://keycloak.<IP>.nip.io/auth/realms/FSA
+            - name: JWT_URI
+              value: https://keycloak.<IP>.nip.io/auth/realms/FSA/protocol/openid-connect/certs
+            # Spring Boot JAVA_OPTS
+            - name: JAVA_OPTS
+              value: >-
+                -Dspring.datasource.url=jdbc:postgresql://${DB_URL}:5432/eventfindr-db
+                -Dspring.datasource.username=${DB_USERNAME}
+                -Dspring.datasource.password=${DB_PASSWORD}
+                -Dspring.security.oauth2.resourceserver.jwt.issuer-uri=${ISSUER_URI}
+                -Dspring.security.oauth2.resourceserver.jwt.jwk-uri=${JWT_URI}
+          resources:
+            limits:
+              cpu: 500m
+              memory: 500Mi
+            requests:
+              cpu: 100m
+              memory: 250Mi
+          ports:
+            - name: http
+              containerPort: 8080
+          # Health checks sú zakomentované, dokýmaž nemáš /actuator/health endpoint
+          # Keď ho implementuješ, rozhomentiš tieto
+          # livenessProbe:
+          #   initialDelaySeconds: 60
+          #   periodSeconds: 10
+          #   timeoutSeconds: 5
+          #   successThreshold: 1
+          #   failureThreshold: 5
+          #   httpGet:
+          #     path: /actuator/health
+          #     port: http
+          # readinessProbe:
+          #   initialDelaySeconds: 60
+          #   periodSeconds: 10
+          #   timeoutSeconds: 5
+          #   successThreshold: 1
+          #   failureThreshold: 5
+          #   httpGet:
+          #     path: /actuator/health
+          #     port: http
+

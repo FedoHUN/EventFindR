@@ -1,0 +1,16 @@
+# ingress-nginx — EventfindR override values
+# Containuje ĽUBOVOLNÉ zmeny oproti default values
+
+controller:
+  service:
+    annotations:
+      # POZOR: Zameniaj <your-prefix> a <region> za tvoje skutočné hodnoty!
+      # Node Resource Group: az aks show --resource-group rg-fsa-<prefix> --name aks-fsa-<prefix> --query nodeResourceGroup -o tsv
+      # Region/Zone: az aks show --resource-group rg-fsa-<prefix> --name aks-fsa-<prefix> --query location -o tsv
+      service.beta.kubernetes.io/azure-load-balancer-resource-group: "MC_rg-fsa-<your-prefix>_<region>"
+      service.beta.kubernetes.io/azure-pip-name: "pip-fsa-<your-prefix>"
+    externalTrafficPolicy: "Local"
+
+defaultBackend:
+  enabled: true
+
