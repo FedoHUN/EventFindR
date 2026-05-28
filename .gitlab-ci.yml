@@ -71,7 +71,12 @@ deploy_aks:
         rm -f ~/.kube/config.decoded
       fi
       sed -i 's/\r$//' ~/.kube/config
-      grep -q "apiVersion:" ~/.kube/config || (echo "KUBECONFIG_BASE64 did not produce a valid kubeconfig. Store either raw kubeconfig YAML or base64-encoded kubeconfig YAML." && exit 1)
+      if ! kubectl config view --raw >/dev/null 2>&1 && grep -q '\\n' ~/.kube/config; then
+        awk '{gsub(/\\n/,"\n")}1' ~/.kube/config > ~/.kube/config.normalized
+        mv ~/.kube/config.normalized ~/.kube/config
+        sed -i 's/\r$//' ~/.kube/config
+      fi
+      kubectl config view --raw >/dev/null || (echo "KUBECONFIG_BASE64 did not produce a valid kubeconfig. Regenerate it with: kubectl config view --raw | base64 -w 0" && exit 1)
       kubectl config current-context
     - export IMAGE_VERSION="${CI_PIPELINE_IID}-${CI_COMMIT_SHORT_SHA}"
   script:
