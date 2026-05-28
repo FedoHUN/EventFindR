@@ -62,8 +62,17 @@ deploy_aks:
     - chmod +x /usr/local/bin/kubectl
     - kubectl version --client=true
     - test -n "$KUBECONFIG_BASE64" || (echo "Missing CI variable KUBECONFIG_BASE64" && exit 1)
-    - mkdir -p ~/.kube
-    - echo "$KUBECONFIG_BASE64" | base64 -d > ~/.kube/config
+    - |
+      mkdir -p ~/.kube
+      if printf '%s' "$KUBECONFIG_BASE64" | base64 -d > ~/.kube/config.decoded 2>/dev/null && grep -q "apiVersion:" ~/.kube/config.decoded; then
+        mv ~/.kube/config.decoded ~/.kube/config
+      else
+        printf '%s' "$KUBECONFIG_BASE64" > ~/.kube/config
+        rm -f ~/.kube/config.decoded
+      fi
+      sed -i 's/\r$//' ~/.kube/config
+      grep -q "apiVersion:" ~/.kube/config || (echo "KUBECONFIG_BASE64 did not produce a valid kubeconfig. Store either raw kubeconfig YAML or base64-encoded kubeconfig YAML." && exit 1)
+      kubectl config current-context
     - export IMAGE_VERSION="${CI_PIPELINE_IID}-${CI_COMMIT_SHORT_SHA}"
   script:
     - kubectl apply -f kubernetes/workload/01-namespace.yaml
