@@ -1,5 +1,6 @@
 stages:
-  - build
+  - build_backend
+  - build_frontend
   - deploy
 
 workflow:
@@ -15,7 +16,6 @@ variables:
   DOCKER_TLS_CERTDIR: ""
 
 .docker-build:
-  stage: build
   image: docker:27.5
   services:
     - name: docker:27.5-dind
@@ -30,6 +30,7 @@ variables:
 
 build_backend:
   extends: .docker-build
+  stage: build_backend
   script:
     - docker build -t "$ACR_REGISTRY/$BACKEND_IMAGE_NAME:$IMAGE_VERSION" -t "$ACR_REGISTRY/$BACKEND_IMAGE_NAME:latest" fsa-eventfindr-backend
     - docker push "$ACR_REGISTRY/$BACKEND_IMAGE_NAME:$IMAGE_VERSION"
@@ -37,6 +38,7 @@ build_backend:
 
 build_frontend:
   extends: .docker-build
+  stage: build_frontend
   script:
     - docker build -t "$ACR_REGISTRY/$FRONTEND_IMAGE_NAME:$IMAGE_VERSION" -t "$ACR_REGISTRY/$FRONTEND_IMAGE_NAME:latest" fsa-eventfindr-frontend
     - docker push "$ACR_REGISTRY/$FRONTEND_IMAGE_NAME:$IMAGE_VERSION"
