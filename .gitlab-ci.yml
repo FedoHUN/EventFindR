@@ -20,8 +20,6 @@ variables:
   services:
     - name: docker:27.5-dind
       alias: docker
-  tags:
-    - fsa
   before_script:
     - until docker info >/dev/null 2>&1; do echo "Waiting for Docker daemon..."; sleep 2; done
     - test -n "$ACR_REGISTRY" || (echo "Missing CI variable ACR_REGISTRY" && exit 1)
@@ -47,8 +45,6 @@ build_frontend:
 deploy_aks:
   stage: deploy
   image: bitnami/kubectl:1.34
-  tags:
-    - fsa
   needs:
     - build_backend
     - build_frontend
