@@ -11,8 +11,9 @@ RUN npm ci
 
 COPY . .
 
-# Produkcny Angular build generuje staticke subory do dist/.
-RUN npm run build
+# Nginx kontajner potrebuje iba browser build; SSR server build by zbytocne zatazoval CI runner.
+ENV NODE_OPTIONS=--max-old-space-size=768
+RUN npm run build:static
 
 FROM nginx:alpine
 
@@ -21,11 +22,6 @@ COPY nginx.conf /etc/nginx/nginx.conf
 # Nginx image nahradi defaultnu stranku build vystupom aplikacie.
 RUN rm -rf /usr/share/nginx/html/*
 COPY --from=build /app/dist/fsa-eventfindr-frontend/browser /usr/share/nginx/html
-
-# Angular SSR build moze vytvorit index.csr.html; Nginx ocakava index.html.
-RUN if [ ! -f /usr/share/nginx/html/index.html ]; then \
-      cp /usr/share/nginx/html/index.csr.html /usr/share/nginx/html/index.html; \
-    fi
 
 EXPOSE 80
 

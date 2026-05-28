@@ -5,6 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:static": "ng build --configuration static-production",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:fsa-eventfindr-frontend": "node dist/fsa-eventfindr-frontend/server/server.mjs"

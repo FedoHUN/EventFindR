@@ -69,6 +69,24 @@
               ],
               "outputHashing": "all"
             },
+            "static-production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "1MB",
+                  "maximumError": "2MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "8kB",
+                  "maximumError": "12kB"
+                }
+              ],
+              "outputHashing": "all",
+              "outputMode": "static",
+              "ssr": false,
+              "server": false
+            },
             "development": {
               "fileReplacements": [
                 {
