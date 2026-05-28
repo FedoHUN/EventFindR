@@ -1,30 +1,86 @@
-// EventfindR Theme Colors
+// ────────────────────────────────────────────
+// EventfindR Design System — Variables
+// ────────────────────────────────────────────
+
+// Brand palette
 $ef-primary: #6f42c1;
 $ef-primary-light: #8b5cf6;
 $ef-primary-dark: #5b21b6;
-$ef-primary-50: #f4eeff;
+$ef-primary-50: #f5f0ff;
+$ef-primary-100: #ede5ff;
 $ef-primary-200: #d6c2ff;
 $ef-primary-700: #4b1f8a;
 
 $ef-accent: #f59e0b;
-$ef-accent-soft: #ffd9a0;
-$ef-accent-strong: #e88a00;
+$ef-accent-soft: #fef3c7;
+$ef-accent-strong: #d97706;
 
-$ef-bg: #f8f9fa;
+// Surfaces & backgrounds
+$ef-bg: #f8f9fc;
+$ef-surface: #ffffff;
 $ef-surface-warm: #fff7ed;
-$ef-border-subtle: #e9dffb;
+$ef-surface-elevated: #ffffff;
+$ef-border-subtle: #e5e7eb;
+$ef-border-light: #f3f4f6;
 
-$ef-text: #212529;
-$ef-text-muted: #6c757d;
+// Text
+$ef-text: #1f2937;
+$ef-text-muted: #6b7280;
+$ef-text-light: #9ca3af;
 
+// Shadows
+$ef-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+$ef-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+$ef-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+$ef-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+$ef-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.03);
+
+// Border radius
+$ef-radius-sm: 0.5rem;
+$ef-radius-md: 0.75rem;
+$ef-radius-lg: 1rem;
+$ef-radius-xl: 1.25rem;
+
+// ────────────────────────────────────────────
 // Bootstrap Variable Overrides
+// ────────────────────────────────────────────
 $body-bg: $ef-bg;
 $body-color: $ef-text;
-$font-family-sans-serif: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+$font-family-sans-serif: 'Outfit', 'Segoe UI', sans-serif;
+$font-family-display: 'Bricolage Grotesque', 'Segoe UI', sans-serif;
+$font-size-base: 0.9375rem;
+$line-height-base: 1.6;
+$headings-font-family: $font-family-display;
+$headings-font-weight: 700;
+$headings-color: #111827;
 
-// Override Bootstrap's primary color; other defaults (secondary, success, danger,
-// warning, info, light, dark) are preserved because we only override "primary".
 $primary: $ef-primary;
 
-// Buttons
+$border-radius: $ef-radius-sm;
+$border-radius-sm: 0.375rem;
+$border-radius-lg: $ef-radius-md;
+
+$card-border-width: 1px;
+$card-border-color: $ef-border-subtle;
+$card-border-radius: $ef-radius-lg;
+$card-cap-bg: transparent;
+$card-spacer-y: 1.25rem;
+$card-spacer-x: 1.5rem;
+
 $btn-font-weight: 600;
+$btn-padding-y: 0.5rem;
+$btn-padding-x: 1.25rem;
+$btn-border-radius: $ef-radius-sm;
+
+$input-border-color: #d1d5db;
+$input-focus-border-color: $ef-primary-light;
+$input-focus-box-shadow: 0 0 0 3px rgba($ef-primary, 0.12);
+$input-border-radius: $ef-radius-sm;
+$input-padding-y: 0.625rem;
+$input-padding-x: 0.875rem;
+
+$navbar-dark-color: rgba(255, 255, 255, 0.85);
+$navbar-dark-hover-color: #ffffff;
+$navbar-dark-active-color: #ffffff;
+
+$link-decoration: none;

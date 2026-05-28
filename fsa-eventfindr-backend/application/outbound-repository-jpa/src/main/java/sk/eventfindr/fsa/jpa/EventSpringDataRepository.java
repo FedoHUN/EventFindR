@@ -10,4 +10,12 @@ interface EventSpringDataRepository extends JpaRepository<Event, Long> {
     Collection<Event> findByLocationContainingIgnoreCase(String location);
 
     Collection<Event> findByNameContainingIgnoreCase(String name);
+
+    Collection<Event> findByIdIn(Collection<Long> ids);
+
+    Collection<Event> findByGenreIgnoreCase(String genre);
+
+    Collection<Event> findByStatus(sk.eventfindr.fsa.domain.EventStatus status);
+
+    Collection<Event> findByOrganizer_IdAndStatus(Long organizerId, sk.eventfindr.fsa.domain.EventStatus status);
 }

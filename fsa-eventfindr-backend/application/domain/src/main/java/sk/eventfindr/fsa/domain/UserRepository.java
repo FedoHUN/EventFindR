@@ -14,4 +14,8 @@ public interface UserRepository {
     void create(User user);
 
     void update(User user);
+
+    Collection<User> searchArtistsByName(String nameFragment);
+
+    Collection<User> findAllArtists();
 }

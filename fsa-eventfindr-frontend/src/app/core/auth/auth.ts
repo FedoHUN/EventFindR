@@ -1,8 +1,9 @@
-import { inject, Injectable, signal, PLATFORM_ID } from '@angular/core';
+import { DestroyRef, inject, Injectable, signal, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { OAuthService } from 'angular-oauth2-oidc';
-import { firstValueFrom } from 'rxjs';
+import { catchError, firstValueFrom, of } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { User, UserRole } from './auth.model';
 import { authCodeFlowConfig } from './oidc.config';
 import { environment } from '../../../environments/environment';
@@ -11,8 +12,10 @@ import { environment } from '../../../environments/environment';
 export class AuthService {
   private readonly oauthService = inject(OAuthService);
   private readonly http = inject(HttpClient);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private readonly _currentUser = signal<Partial<User> | undefined>(undefined);
+  private roleSyncInFlight?: Promise<UserRole | undefined>;
 
   readonly user = this._currentUser.asReadonly();
 
@@ -21,13 +24,9 @@ export class AuthService {
 
     this.oauthService.configure(authCodeFlowConfig);
 
-    this.oauthService.events.subscribe(() => {
-      const jwtUser = this.extractUser();
-      this._currentUser.set(jwtUser);
-      if (jwtUser) {
-        this.syncRoleFromBackend();
-      }
-    });
+    this.oauthService.events.pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(() => this.updateUserFromToken());
 
     this.tryLogin();
   }
@@ -39,23 +38,41 @@ export class AuthService {
    */
   async getRoleFromBackend(): Promise<UserRole | undefined> {
     if (!this.oauthService.hasValidAccessToken()) return undefined;
+    if (this.roleSyncInFlight) return this.roleSyncInFlight;
 
-    try {
-      const dbUser = await firstValueFrom(this.http.get<{ rola: UserRole }>(`${environment.beUrl}/users/me`));
+    this.roleSyncInFlight = firstValueFrom(
+      this.http.get<User>(`${environment.beUrl}/users/me`).pipe(
+        catchError(() => of(undefined))
+      )
+    ).then((dbUser) => {
       const current = this._currentUser();
-      if (current && dbUser?.rola) {
-        this._currentUser.set({ ...current, rola: dbUser.rola });
+      if (current && dbUser?.role) {
+        this._currentUser.set({ ...current, ...dbUser });
       }
-      return dbUser?.rola;
-    } catch (e) {
-      return undefined;
-    }
+      return dbUser?.role;
+    }).finally(() => {
+      this.roleSyncInFlight = undefined;
+    });
+
+    return this.roleSyncInFlight;
   }
 
   login() {
     this.oauthService.loadDiscoveryDocumentAndLogin().then(() => {
-      this._currentUser.set(this.extractUser());
+      this.updateUserFromToken();
       this.syncRoleFromBackend();
+    });
+  }
+
+  register() {
+    this.oauthService.loadDiscoveryDocument().then(() => {
+      const registrationUrl =
+        `${authCodeFlowConfig.issuer}/protocol/openid-connect/registrations` +
+        `?client_id=${encodeURIComponent(authCodeFlowConfig.clientId!)}` +
+        `&response_type=code` +
+        `&scope=${encodeURIComponent(authCodeFlowConfig.scope!)}` +
+        `&redirect_uri=${encodeURIComponent(authCodeFlowConfig.redirectUri!)}`;
+      location.href = registrationUrl;
     });
   }
 
@@ -66,7 +83,7 @@ export class AuthService {
 
   tryLogin() {
     return this.oauthService.loadDiscoveryDocumentAndTryLogin().then(() => {
-      this._currentUser.set(this.extractUser());
+      this.updateUserFromToken();
       this.syncRoleFromBackend();
       return this._currentUser();
     });
@@ -74,7 +91,12 @@ export class AuthService {
 
   isOrganizer(): boolean {
     const user = this._currentUser();
-    return user?.rola === 'ORGANIZER' || user?.rola === 'ADMIN';
+    return user?.role === 'ORGANIZER' || user?.role === 'ADMIN';
+  }
+
+  isArtist(): boolean {
+    const user = this._currentUser();
+    return !!user?.artistName || user?.role === 'ARTIST' || user?.role === 'ADMIN';
   }
 
   refreshRole(): void {
@@ -84,15 +106,7 @@ export class AuthService {
   private syncRoleFromBackend(): void {
     if (!this.oauthService.hasValidAccessToken()) return;
 
-    this.http.get<{ rola: UserRole }>(`${environment.beUrl}/users/me`).subscribe({
-      next: (dbUser) => {
-        const current = this._currentUser();
-        if (current && dbUser.rola) {
-          this._currentUser.set({ ...current, rola: dbUser.rola });
-        }
-      },
-      error: () => {}
-    });
+    void this.getRoleFromBackend();
   }
 
   private extractUser(): Partial<User> | undefined {
@@ -102,14 +116,19 @@ export class AuthService {
     if (!claims) return undefined;
 
     const roles = (claims['realm_access'] as { roles?: string[] })?.roles ?? [];
-    let rola: UserRole = 'USER';
-    if (roles.includes('ADMIN')) rola = 'ADMIN';
-    else if (roles.includes('ORGANIZER')) rola = 'ORGANIZER';
+    let role: UserRole = 'USER';
+    if (roles.includes('ADMIN')) role = 'ADMIN';
+    else if (roles.includes('ORGANIZER')) role = 'ORGANIZER';
+    else if (roles.includes('ARTIST')) role = 'ARTIST';
 
     return {
       name: (claims['name'] as string) ?? (claims['preferred_username'] as string) ?? 'User',
       email: (claims['email'] as string) ?? (claims['sub'] as string) ?? '',
-      rola
+      role
     };
+  }
+
+  private updateUserFromToken(): void {
+    this._currentUser.set(this.extractUser());
   }
 }

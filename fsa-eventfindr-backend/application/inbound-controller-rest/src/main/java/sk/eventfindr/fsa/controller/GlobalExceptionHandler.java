@@ -1,6 +1,7 @@
 package sk.eventfindr.fsa.controller;
 
 import jakarta.validation.ConstraintViolationException;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -17,6 +18,7 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import sk.eventfindr.fsa.domain.EventfindrException;
 import sk.eventfindr.fsa.rest.dto.ErrorResponseDto;
 
@@ -27,9 +29,11 @@ import java.util.stream.Stream;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     @ExceptionHandler(EventfindrException.class)
     public ResponseEntity<ErrorResponseDto> handleEventfindrException(EventfindrException ex, WebRequest request) {
-        LoggerFactory.getLogger(GlobalExceptionHandler.class).warn("Domain error: {}", ex.getMessage());
+        log.warn("Domain error: {}", ex.getMessage());
         return new ResponseEntity<>(
                 createError(resolveCode(ex), ex.getMessage(), ex.getDetails(), request),
                 resolveStatus(ex));
@@ -99,15 +103,22 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponseDto> handleAccessDeniedException(AccessDeniedException ex, WebRequest request) {
-        LoggerFactory.getLogger(GlobalExceptionHandler.class).warn("Access denied: {}", ex.getMessage());
+        log.warn("Access denied: {}", ex.getMessage());
         return new ResponseEntity<>(
                 createError("FORBIDDEN", "Access denied", List.of("Insufficient permissions"), request),
                 HttpStatus.FORBIDDEN);
     }
 
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorResponseDto> handleMaxUploadSizeExceeded(MaxUploadSizeExceededException ex, WebRequest request) {
+        return new ResponseEntity<>(
+                createError("VALIDATION_ERROR", "File too large", List.of("Maximum upload size exceeded"), request),
+                HttpStatus.PAYLOAD_TOO_LARGE);
+    }
+
     @ExceptionHandler(Throwable.class)
     public ResponseEntity<ErrorResponseDto> handleThrowable(Throwable ex, WebRequest request) {
-        LoggerFactory.getLogger(GlobalExceptionHandler.class).error("Global error occurred", ex);
+        log.error("Global error occurred", ex);
         return new ResponseEntity<>(
                 createError("INTERNAL_ERROR", "Unexpected internal error", List.of("Please contact support"), request),
                 HttpStatus.INTERNAL_SERVER_ERROR);

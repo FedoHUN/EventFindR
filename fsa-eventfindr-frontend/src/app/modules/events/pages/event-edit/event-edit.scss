@@ -1,0 +1,55 @@
+@use '../event-create/event-create';
+
+.media-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.75rem;
+}
+
+.media-item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--ef-radius-sm, 6px);
+  overflow: hidden;
+  border: 2px solid var(--ef-border-subtle, #e5e7eb);
+}
+
+.media-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.media-actions {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  gap: 2px;
+  padding: 4px;
+  background: rgba(0, 0, 0, 0.6);
+  justify-content: center;
+}
+
+.media-cover-badge {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: var(--ef-primary, #6f42c1);
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+@media (max-width: 575.98px) {
+  .media-grid {
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 0.5rem;
+  }
+}

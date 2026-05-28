@@ -7,7 +7,7 @@ export const authCodeFlowConfig: AuthConfig = {
   clientId: 'eventfindr-client',
   responseType: 'code',
   scope: 'openid profile email offline_access',
-  showDebugInformation: true,
-  requireHttps: false,
-  strictDiscoveryDocumentValidation: false,
+  showDebugInformation: !environment.production,
+  requireHttps: environment.production,
+  strictDiscoveryDocumentValidation: environment.production,
 };

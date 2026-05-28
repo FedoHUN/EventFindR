@@ -29,7 +29,7 @@ public class JpaUserRepositoryAdapter implements UserRepository {
 
     @Override
     public Collection<User> findByRole(UserRole role) {
-        return userSpringDataRepository.findByRola(role);
+        return userSpringDataRepository.findByRole(role);
     }
 
     @Override
@@ -40,5 +40,15 @@ public class JpaUserRepositoryAdapter implements UserRepository {
     @Override
     public void update(User user) {
         userSpringDataRepository.save(user);
+    }
+
+    @Override
+    public Collection<User> searchArtistsByName(String nameFragment) {
+        return userSpringDataRepository.findByArtistNameContainingIgnoreCase(nameFragment);
+    }
+
+    @Override
+    public Collection<User> findAllArtists() {
+        return userSpringDataRepository.findByArtistNameIsNotNull();
     }
 }

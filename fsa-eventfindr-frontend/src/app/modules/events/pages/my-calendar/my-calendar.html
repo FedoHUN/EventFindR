@@ -1,0 +1,72 @@
+<div class="container py-5">
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div>
+      <h1 class="fw-bold mb-1"><i class="bi bi-calendar-week me-2"></i>My Calendar</h1>
+      <p class="text-muted mb-0">Events you're attending or watching</p>
+    </div>
+    <div class="btn-group" role="group" aria-label="Filter events">
+      <button class="btn btn-sm" [class.btn-primary]="filter() === 'upcoming'" [class.btn-outline-primary]="filter() !== 'upcoming'" (click)="setFilter('upcoming')">Upcoming</button>
+      <button class="btn btn-sm" [class.btn-primary]="filter() === 'past'" [class.btn-outline-primary]="filter() !== 'past'" (click)="setFilter('past')">Past</button>
+      <button class="btn btn-sm" [class.btn-primary]="filter() === 'all'" [class.btn-outline-primary]="filter() !== 'all'" (click)="setFilter('all')">All</button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  } @else if (filteredEvents().length === 0) {
+    <div class="empty-state text-center py-5">
+      <div class="empty-state-icon"><i class="bi bi-calendar-x"></i></div>
+      <h4 class="fw-bold mt-3">No events here</h4>
+      <p class="text-muted">Browse events and mark them as attending or watching to see them here.</p>
+      <a routerLink="/events" class="btn btn-primary">Browse Events</a>
+    </div>
+  } @else {
+    @for (group of groupedEvents(); track group.label) {
+      <div class="month-group mb-4">
+        <h5 class="month-label">{{ group.label }}</h5>
+        <div class="timeline">
+          @for (event of group.events; track event.id) {
+            <a [routerLink]="['/events', event.id]" class="text-decoration-none">
+              <div class="timeline-item" [class.timeline-item--past]="!isUpcoming(event)">
+                <div class="timeline-date">
+                  <span class="timeline-day">{{ event.eventDate | date:'d' }}</span>
+                  <span class="timeline-weekday">{{ event.eventDate | date:'EEE' }}</span>
+                </div>
+                <div class="timeline-card">
+                  @if (event.imageUrl) {
+                    <img [src]="eventApi.resolveImageUrl(event.imageUrl)" [alt]="event.name" class="timeline-img">
+                  } @else {
+                    <div class="timeline-img timeline-placeholder">
+                      <i class="bi bi-music-note-beamed text-white"></i>
+                    </div>
+                  }
+                  <div class="timeline-body">
+                    <h6 class="fw-bold mb-1">{{ event.name }}</h6>
+                    <p class="text-muted small mb-1">
+                      <i class="bi bi-clock me-1"></i>{{ event.eventDate | date:'shortTime' }}
+                      <span class="mx-1">·</span>
+                      <i class="bi bi-geo-alt me-1"></i>{{ event.location }}
+                    </p>
+                    @if (isUpcoming(event)) {
+                      @if (daysUntil(event) === 0) {
+                        <span class="badge bg-success">Today!</span>
+                      } @else if (daysUntil(event) === 1) {
+                        <span class="badge bg-warning text-dark">Tomorrow</span>
+                      } @else {
+                        <span class="badge bg-primary">In {{ daysUntil(event) }} days</span>
+                      }
+                    }
+                  </div>
+                </div>
+              </div>
+            </a>
+          }
+        </div>
+      </div>
+    }
+  }
+</div>

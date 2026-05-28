@@ -2,8 +2,9 @@ import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/
 import { provideRouter } from '@angular/router';
 import { HTTP_INTERCEPTORS, provideHttpClient, withFetch, withInterceptorsFromDi } from '@angular/common/http';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
-import { DefaultOAuthInterceptor, provideOAuthClient } from 'angular-oauth2-oidc';
+import { provideOAuthClient } from 'angular-oauth2-oidc';
 import { routes } from './app.routes';
+import { AuthTokenInterceptor } from './core/http/auth-token.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -11,11 +12,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(withFetch(), withInterceptorsFromDi()),
     provideClientHydration(withEventReplay()),
-    provideOAuthClient({
-      resourceServer: {
-        sendAccessToken: true,
-      },
-    }),
-    { provide: HTTP_INTERCEPTORS, useClass: DefaultOAuthInterceptor, multi: true },
+    provideOAuthClient(),
+    { provide: HTTP_INTERCEPTORS, useClass: AuthTokenInterceptor, multi: true },
   ]
 };

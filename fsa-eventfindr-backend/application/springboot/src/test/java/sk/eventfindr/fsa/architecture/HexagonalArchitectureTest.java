@@ -40,7 +40,7 @@ class HexagonalArchitectureTest {
                         "sk.eventfindr.fsa.jpa..",
                         "sk.eventfindr.fsa.rest..",
                         "sk.eventfindr.fsa")
-                .because("doména má zostať technologicky agnostická a nesmie poznať adaptéry ani runtime vrstvu");
+                .because("the domain must stay technology-agnostic and must not know adapters or the runtime layer");
 
         rule.check(CLASSES);
     }
@@ -56,7 +56,7 @@ class HexagonalArchitectureTest {
                 .resideInAnyPackage(
                         "sk.eventfindr.fsa.jpa..",
                         "sk.eventfindr.fsa")
-                .because("REST vstup má delegovať do domény, nie siahať do JPA adaptéra ani runtime skladania");
+                .because("REST inbound code must delegate to the domain and must not reach into JPA adapters or runtime composition");
 
         rule.check(CLASSES);
     }
@@ -73,7 +73,7 @@ class HexagonalArchitectureTest {
                         "sk.eventfindr.fsa.rest..",
                         "sk.eventfindr.fsa.domain.service..",
                         "sk.eventfindr.fsa")
-                .because("JPA adaptér má implementovať doménové porty, nie poznať inbound vrstvu, DTO kontrakt ani runtime");
+                .because("JPA adapters must implement domain ports and must not know inbound code, DTO contracts, or runtime composition");
 
         rule.check(CLASSES);
     }
@@ -90,7 +90,7 @@ class HexagonalArchitectureTest {
                         "sk.eventfindr.fsa.rest..")
                 .should().dependOnClassesThat()
                 .resideInAPackage("sk.eventfindr.fsa")
-                .because("runtime skladanie beanov patrí iba do springboot modulu");
+                .because("runtime bean composition belongs only in the springboot module");
 
         rule.check(CLASSES);
     }
@@ -102,7 +102,7 @@ class HexagonalArchitectureTest {
                 .and().areTopLevelClasses()
                 .should().beAnnotatedWith(RestController.class)
                 .orShould().beAnnotatedWith(RestControllerAdvice.class)
-                .because("controller package má obsahovať iba REST vstupné body a centralizovaný error handling");
+                .because("the controller package must contain only REST entry points and centralized error handling");
 
         rule.check(CLASSES);
     }
@@ -113,14 +113,14 @@ class HexagonalArchitectureTest {
                 .that().resideInAPackage("sk.eventfindr.fsa.domain")
                 .and().haveSimpleNameEndingWith("Repository")
                 .should().beInterfaces()
-                .because("doménové repository sú porty a majú byť rozhrania");
+                .because("domain repositories are ports and must be interfaces");
 
         ArchRule outboundAdapters = classes()
                 .that().resideInAPackage("sk.eventfindr.fsa.jpa..")
                 .and().haveSimpleNameEndingWith("RepositoryAdapter")
                 .should().beAnnotatedWith(Repository.class)
                 .andShould(implementDomainRepositoryPort())
-                .because("outbound repository adapter má byť Spring repository bean implementujúci doménový port");
+                .because("outbound repository adapters must be Spring repository beans implementing domain ports");
 
         domainPorts.check(CLASSES);
         outboundAdapters.check(CLASSES);
@@ -133,7 +133,7 @@ class HexagonalArchitectureTest {
                 .and().haveSimpleNameEndingWith("SpringDataRepository")
                 .should().beInterfaces()
                 .andShould().notBePublic()
-                .because("Spring Data repozitáre sú interný detail outbound adaptéra a nemajú sa používať mimo neho");
+                .because("Spring Data repositories are internal outbound adapter details and must not be used outside that adapter");
 
         rule.check(CLASSES);
     }
@@ -142,9 +142,10 @@ class HexagonalArchitectureTest {
     void runtime_root_should_only_contain_application_and_configuration_classes() {
         ArchRule rule = classes()
                 .that().resideInAPackage("sk.eventfindr.fsa")
+                .and().areTopLevelClasses()
                 .should().beAnnotatedWith(org.springframework.context.annotation.Configuration.class)
                 .orShould().beAnnotatedWith(SpringBootApplication.class)
-                .because("root runtime package má obsahovať len bootstrapping a bean konfigurácie");
+                .because("the root runtime package must contain only bootstrapping and bean configuration classes");
 
         rule.check(CLASSES);
     }

@@ -11,5 +11,9 @@ interface UserSpringDataRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByEmail(String email);
 
-    Collection<User> findByRola(UserRole rola);
+    Collection<User> findByRole(UserRole role);
+
+    Collection<User> findByArtistNameContainingIgnoreCase(String artistName);
+
+    Collection<User> findByArtistNameIsNotNull();
 }

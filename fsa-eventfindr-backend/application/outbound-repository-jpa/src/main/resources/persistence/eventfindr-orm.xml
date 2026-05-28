@@ -20,9 +20,21 @@
             <basic name="email">
                 <column name="email" nullable="false" unique="true"/>
             </basic>
-            <basic name="rola">
+            <basic name="role">
                 <column name="rola" nullable="false"/>
                 <convert converter="sk.eventfindr.fsa.jpa.UserRoleConverter"/>
+            </basic>
+            <basic name="organizationName">
+                <column name="organization_name"/>
+            </basic>
+            <basic name="organizationDescription">
+                <column name="organization_description" length="2000"/>
+            </basic>
+            <basic name="artistName">
+                <column name="artist_name"/>
+            </basic>
+            <basic name="artistDescription">
+                <column name="artist_description" length="2000"/>
             </basic>
         </attributes>
     </entity>
@@ -55,9 +67,29 @@
             <basic name="imageUrl">
                 <column name="image_url"/>
             </basic>
-            <basic name="performers">
-                <column name="performers"/>
+            <basic name="genre">
+                <column name="genre"/>
             </basic>
+            <basic name="status">
+                <column name="status" nullable="false"/>
+                <convert converter="sk.eventfindr.fsa.jpa.EventStatusConverter"/>
+            </basic>
+            <basic name="featured">
+                <column name="featured" nullable="false"/>
+            </basic>
+            <basic name="canceled">
+                <column name="canceled" nullable="false"/>
+            </basic>
+            <basic name="capacity">
+                <column name="capacity"/>
+            </basic>
+            <transient name="artists"/>
+            <transient name="attendingCount"/>
+            <transient name="watchingCount"/>
+            <transient name="commentCount"/>
+            <transient name="averageRating"/>
+            <transient name="ratingCount"/>
+            <transient name="coverImageMediaId"/>
             <basic name="created">
                 <column name="created" nullable="false"/>
             </basic>
@@ -87,6 +119,195 @@
             <many-to-one name="user" target-entity="sk.eventfindr.fsa.domain.User">
                 <join-column name="user_id" nullable="false"/>
             </many-to-one>
+        </attributes>
+    </entity>
+
+    <entity class="sk.eventfindr.fsa.domain.EventMedia" access="FIELD">
+        <table name="event_media"/>
+        <attributes>
+            <id name="id">
+                <column name="media_id"/>
+                <generated-value strategy="IDENTITY"/>
+            </id>
+            <basic name="eventId">
+                <column name="event_id" nullable="false"/>
+            </basic>
+            <basic name="fileName">
+                <column name="file_name" nullable="false"/>
+            </basic>
+            <basic name="originalName">
+                <column name="original_name" nullable="false"/>
+            </basic>
+            <basic name="contentType">
+                <column name="content_type" nullable="false"/>
+            </basic>
+            <basic name="mediaType">
+                <column name="media_type" nullable="false"/>
+                <convert converter="sk.eventfindr.fsa.jpa.MediaTypeConverter"/>
+            </basic>
+            <basic name="fileSize">
+                <column name="file_size" nullable="false"/>
+            </basic>
+            <basic name="sortOrder">
+                <column name="sort_order" nullable="false"/>
+            </basic>
+            <basic name="created">
+                <column name="created" nullable="false"/>
+            </basic>
+        </attributes>
+    </entity>
+
+    <entity class="sk.eventfindr.fsa.domain.EventArtist" access="FIELD">
+        <table name="event_artist"/>
+        <attributes>
+            <id name="id">
+                <column name="event_artist_id"/>
+                <generated-value strategy="IDENTITY"/>
+            </id>
+            <basic name="eventId">
+                <column name="event_id" nullable="false"/>
+            </basic>
+            <basic name="artistUserId">
+                <column name="artist_user_id"/>
+            </basic>
+            <basic name="artistName">
+                <column name="artist_name" nullable="false"/>
+            </basic>
+            <basic name="sortOrder">
+                <column name="sort_order" nullable="false"/>
+            </basic>
+        </attributes>
+    </entity>
+
+    <entity class="sk.eventfindr.fsa.domain.EventComment" access="FIELD">
+        <table name="event_comment"/>
+        <attributes>
+            <id name="id">
+                <column name="comment_id"/>
+                <generated-value strategy="IDENTITY"/>
+            </id>
+            <basic name="eventId">
+                <column name="event_id" nullable="false"/>
+            </basic>
+            <basic name="content">
+                <column name="content" nullable="false" length="2000"/>
+            </basic>
+            <basic name="rating">
+                <column name="rating"/>
+            </basic>
+            <basic name="created">
+                <column name="created" nullable="false"/>
+            </basic>
+            <many-to-one name="user" target-entity="sk.eventfindr.fsa.domain.User">
+                <join-column name="user_id" nullable="false"/>
+            </many-to-one>
+        </attributes>
+    </entity>
+
+    <entity class="sk.eventfindr.fsa.domain.UserFollow" access="FIELD">
+        <table name="user_follow"/>
+        <attributes>
+            <id name="id">
+                <column name="follow_id"/>
+                <generated-value strategy="IDENTITY"/>
+            </id>
+            <basic name="created">
+                <column name="created" nullable="false"/>
+            </basic>
+            <many-to-one name="follower" target-entity="sk.eventfindr.fsa.domain.User">
+                <join-column name="follower_user_id" nullable="false"/>
+            </many-to-one>
+            <many-to-one name="followed" target-entity="sk.eventfindr.fsa.domain.User">
+                <join-column name="followed_user_id" nullable="false"/>
+            </many-to-one>
+        </attributes>
+    </entity>
+
+    <entity class="sk.eventfindr.fsa.domain.Notification" access="FIELD">
+        <table name="notification"/>
+        <attributes>
+            <id name="id">
+                <column name="notification_id"/>
+                <generated-value strategy="IDENTITY"/>
+            </id>
+            <basic name="userId">
+                <column name="user_id" nullable="false"/>
+            </basic>
+            <basic name="eventId">
+                <column name="event_id"/>
+            </basic>
+            <basic name="type">
+                <column name="type" nullable="false"/>
+                <convert converter="sk.eventfindr.fsa.jpa.NotificationTypeConverter"/>
+            </basic>
+            <basic name="message">
+                <column name="message" nullable="false" length="500"/>
+            </basic>
+            <basic name="read">
+                <column name="is_read" nullable="false"/>
+            </basic>
+            <basic name="created">
+                <column name="created" nullable="false"/>
+            </basic>
+        </attributes>
+    </entity>
+
+    <entity class="sk.eventfindr.fsa.domain.Post" access="FIELD">
+        <table name="post"/>
+        <attributes>
+            <id name="id">
+                <column name="post_id"/>
+                <generated-value strategy="IDENTITY"/>
+            </id>
+            <basic name="content">
+                <column name="content" nullable="false" length="5000"/>
+            </basic>
+            <basic name="created">
+                <column name="created" nullable="false"/>
+            </basic>
+            <basic name="updated">
+                <column name="updated"/>
+            </basic>
+            <transient name="media"/>
+            <transient name="mediaCount"/>
+            <many-to-one name="author" target-entity="sk.eventfindr.fsa.domain.User">
+                <join-column name="author_user_id" nullable="false"/>
+            </many-to-one>
+        </attributes>
+    </entity>
+
+    <entity class="sk.eventfindr.fsa.domain.PostMedia" access="FIELD">
+        <table name="post_media"/>
+        <attributes>
+            <id name="id">
+                <column name="media_id"/>
+                <generated-value strategy="IDENTITY"/>
+            </id>
+            <basic name="postId">
+                <column name="post_id" nullable="false"/>
+            </basic>
+            <basic name="fileName">
+                <column name="file_name" nullable="false"/>
+            </basic>
+            <basic name="originalName">
+                <column name="original_name" nullable="false"/>
+            </basic>
+            <basic name="contentType">
+                <column name="content_type" nullable="false"/>
+            </basic>
+            <basic name="mediaType">
+                <column name="media_type" nullable="false"/>
+                <convert converter="sk.eventfindr.fsa.jpa.MediaTypeConverter"/>
+            </basic>
+            <basic name="fileSize">
+                <column name="file_size" nullable="false"/>
+            </basic>
+            <basic name="sortOrder">
+                <column name="sort_order" nullable="false"/>
+            </basic>
+            <basic name="created">
+                <column name="created" nullable="false"/>
+            </basic>
         </attributes>
     </entity>
 

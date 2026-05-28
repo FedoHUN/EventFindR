@@ -1,27 +1,37 @@
-<div class="container py-4">
-  <a routerLink="/events" class="btn btn-outline-secondary mb-3">
-    <i class="bi bi-arrow-left me-1"></i>Back to Events
-  </a>
+<div class="container py-5">
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a routerLink="/events">Events</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Create Event</li>
+    </ol>
+  </nav>
 
   <div class="row justify-content-center">
     <div class="col-lg-8">
-      <div class="card border-0 shadow-sm">
-        <div class="card-body p-4">
-          <h1 class="fw-bold mb-4"><i class="bi bi-calendar-plus me-2"></i>Create Event</h1>
+      <div class="form-card">
+        <div class="form-card-header">
+          <h1 class="form-card-title">
+            <i class="bi bi-calendar-plus me-2"></i>Create Event
+          </h1>
+          <p class="text-muted mb-0">Fill in the details below to publish a new event</p>
+        </div>
 
-          @if (errorMessage()) {
-            <div class="alert alert-danger" role="alert">
-              <i class="bi bi-exclamation-triangle me-1"></i>{{ errorMessage() }}
-            </div>
-          }
+        @if (errorMessage()) {
+          <div class="alert alert-danger d-flex align-items-center" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ errorMessage() }}
+          </div>
+        }
 
-          <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+          <div class="form-section">
+            <h6 class="form-section-title">Basic Information</h6>
+
             <div class="mb-3">
-              <label for="name" class="form-label fw-semibold">Event Name <span class="text-danger">*</span></label>
+              <label for="name" class="form-label">Event Name <span class="text-danger">*</span></label>
               <input
                 id="name"
                 type="text"
-                class="form-control"
+                class="form-control form-control-lg"
                 [class.is-invalid]="isInvalid('name')"
                 formControlName="name"
                 placeholder="e.g. Summer Music Festival">
@@ -30,9 +40,23 @@
               }
             </div>
 
+            <div class="mb-3">
+              <label for="description" class="form-label">Description</label>
+              <textarea
+                id="description"
+                class="form-control"
+                formControlName="description"
+                rows="4"
+                placeholder="Describe your event — what makes it special?"></textarea>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h6 class="form-section-title">When & Where</h6>
+
             <div class="row g-3 mb-3">
               <div class="col-md-6">
-                <label for="location" class="form-label fw-semibold">Location <span class="text-danger">*</span></label>
+                <label for="location" class="form-label">Location <span class="text-danger">*</span></label>
                 <input
                   id="location"
                   type="text"
@@ -45,7 +69,7 @@
                 }
               </div>
               <div class="col-md-6">
-                <label for="eventDate" class="form-label fw-semibold">Date & Time <span class="text-danger">*</span></label>
+                <label for="eventDate" class="form-label">Date & Time <span class="text-danger">*</span></label>
                 <input
                   id="eventDate"
                   type="datetime-local"
@@ -53,82 +77,285 @@
                   [class.is-invalid]="isInvalid('eventDate')"
                   formControlName="eventDate">
                 @if (isInvalid('eventDate')) {
-                  <div class="invalid-feedback">Date is required.</div>
+                  <div class="invalid-feedback">Date and time are required.</div>
                 }
               </div>
             </div>
+          </div>
 
-            <div class="mb-3">
-              <label for="description" class="form-label fw-semibold">Description</label>
-              <textarea
-                id="description"
-                class="form-control"
-                formControlName="description"
-                rows="4"
-                placeholder="Describe your event..."></textarea>
-            </div>
-
-            <div class="mb-3">
-              <label for="performers" class="form-label fw-semibold">Performers</label>
+          <div class="form-section">
+            <h6 class="form-section-title">Genre</h6>
+            <div class="mb-3 position-relative">
+              <label for="genre" class="form-label">Event Genre</label>
               <input
-                id="performers"
+                id="genre"
                 type="text"
                 class="form-control"
-                formControlName="performers"
-                placeholder="e.g. DJ Shadow, The Roots">
+                formControlName="genre"
+                placeholder="Select or type a genre (optional)"
+                autocomplete="off"
+                (input)="onGenreInput()"
+                (focus)="onGenreFocus()"
+                (blur)="closeGenreDropdown()">
+              @if (genreSearchOpen() && genreSearchResults().length > 0) {
+                <ul class="dropdown-menu show w-100 genre-dropdown" role="listbox">
+                  @for (g of genreSearchResults(); track g) {
+                    <li>
+                      <button
+                        type="button"
+                        class="dropdown-item"
+                        role="option"
+                        (mousedown)="selectGenre(g)">{{ g }}</button>
+                    </li>
+                  }
+                </ul>
+              }
+              <div class="form-text">Select from the list or type a custom genre</div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h6 class="form-section-title">Artists & Details</h6>
+
+            <div class="mb-3">
+              <label class="form-label">Artists / Performers</label>
+
+              @if (selectedArtists().length > 0) {
+                <div class="artist-chips mb-2">
+                  @for (artist of selectedArtists(); track artist.artistName; let i = $index) {
+                    <span class="artist-chip" [class.artist-chip-registered]="artist.registered">
+                      @if (artist.registered) {
+                        <i class="bi bi-person-check-fill me-1"></i>
+                      } @else {
+                        <i class="bi bi-person me-1"></i>
+                      }
+                      {{ artist.artistName }}
+                      <button type="button" class="artist-chip-remove" (click)="removeArtist(i)" [attr.aria-label]="'Remove ' + artist.artistName">
+                        <i class="bi bi-x"></i>
+                      </button>
+                    </span>
+                  }
+                </div>
+              }
+
+              <!-- Search registered artists -->
+              <div class="artist-search-wrapper">
+                <div class="input-group mb-2">
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Search registered artists..."
+                    [value]="artistSearchQuery()"
+                    (input)="onArtistSearchInput($event)"
+                    (keydown)="onArtistSearchKeydown($event)"
+                    (focus)="artistSearchResults().length > 0 && artistSearchOpen.set(true)"
+                    (blur)="closeArtistDropdown()">
+                  <button type="button" class="btn btn-outline-secondary" (click)="doArtistSearch(artistSearchQuery())" [disabled]="artistSearchQuery().length < 2">
+                    <i class="bi bi-search"></i>
+                  </button>
+                </div>
+
+                @if (artistSearchOpen() && artistSearchResults().length > 0) {
+                  <ul class="artist-dropdown" role="listbox">
+                    @for (result of artistSearchResults(); track result.id) {
+                      <li role="option" class="artist-dropdown-item" (mousedown)="selectArtist(result)">
+                        <i class="bi bi-person-check-fill text-success me-2"></i>
+                        <span class="fw-medium">{{ result.artistName || result.name }}</span>
+                      </li>
+                    }
+                  </ul>
+                }
+              </div>
+
+              <!-- Add custom artist -->
+              <div class="input-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Or type a custom artist name..."
+                  [value]="customArtistName()"
+                  (input)="onCustomArtistInput($event)"
+                  (keydown)="onCustomArtistKeydown($event)">
+                <button type="button" class="btn btn-outline-secondary" (click)="addCustomArtist()" [disabled]="!customArtistName().trim()">
+                  <i class="bi bi-plus-lg"></i> Add
+                </button>
+              </div>
+              <div class="form-text">Search for registered artists or add custom names for unregistered performers.</div>
             </div>
 
             <div class="row g-3 mb-3">
-              <div class="col-md-4">
-                <label for="price" class="form-label fw-semibold">Price (EUR)</label>
-                <input
-                  id="price"
-                  type="number"
-                  class="form-control"
-                  [class.is-invalid]="isInvalid('price')"
-                  formControlName="price"
-                  min="0"
-                  step="0.01"
-                  placeholder="0.00 = Free">
-                @if (isInvalid('price')) {
-                  <div class="invalid-feedback">Price must be 0 or more.</div>
-                }
+              <div class="col-md-3">
+                <label for="price" class="form-label">Price (EUR)</label>
+                <div class="input-group">
+                  <span class="input-group-text">&euro;</span>
+                  <input
+                    id="price"
+                    type="number"
+                    class="form-control"
+                    [class.is-invalid]="isInvalid('price')"
+                    formControlName="price"
+                    min="0"
+                    step="0.01"
+                    placeholder="0.00">
+                  @if (isInvalid('price')) {
+                    <div class="invalid-feedback">Price must be 0 or more.</div>
+                  }
+                </div>
+                <div class="form-text">Leave empty for free events</div>
               </div>
-              <div class="col-md-8">
-                <label for="ticketUrl" class="form-label fw-semibold">Ticket URL</label>
+              <div class="col-md-3">
+                <label for="capacity" class="form-label">Capacity</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-people"></i></span>
+                  <input
+                    id="capacity"
+                    type="number"
+                    class="form-control"
+                    [class.is-invalid]="isInvalid('capacity')"
+                    formControlName="capacity"
+                    min="1"
+                    placeholder="Unlimited">
+                  @if (isInvalid('capacity')) {
+                    <div class="invalid-feedback">Capacity must be at least 1.</div>
+                  }
+                </div>
+                <div class="form-text">Leave empty for unlimited</div>
+              </div>
+              <div class="col-md-6">
+                <label for="ticketUrl" class="form-label">Ticket URL</label>
                 <input
                   id="ticketUrl"
                   type="url"
                   class="form-control"
                   formControlName="ticketUrl"
-                  placeholder="https://tickets.example.com/...">
+                  placeholder="https://tickets.example.com">
               </div>
             </div>
 
-            <div class="mb-4">
-              <label for="imageUrl" class="form-label fw-semibold">Image URL</label>
-              <input
-                id="imageUrl"
-                type="url"
-                class="form-control"
-                formControlName="imageUrl"
-                placeholder="https://example.com/image.jpg">
+          </div>
+
+          <div class="form-section">
+            <h6 class="form-section-title">Photos & Video</h6>
+
+            <div class="mb-3">
+              <label class="form-label">Upload Images</label>
+              <div class="form-text mb-2">
+                JPEG, PNG, or WebP. Max 5 MB each. {{ imageCount }}/{{ MAX_IMAGES }} images.
+              </div>
+              @if (imageCount < MAX_IMAGES) {
+                <input
+                  type="file"
+                  class="form-control"
+                  accept="image/jpeg,image/png,image/webp"
+                  multiple
+                  (change)="onFilesSelected($event)">
+              }
             </div>
 
-            <div class="d-flex gap-2">
-              <button
-                type="submit"
-                class="btn btn-primary"
-                [disabled]="submitting()">
-                @if (submitting()) {
-                  <span class="spinner-border spinner-border-sm me-1" role="status"></span>
-                }
-                <i class="bi bi-plus-circle me-1"></i>Create Event
-              </button>
-              <a routerLink="/events" class="btn btn-outline-secondary">Cancel</a>
+            <div class="mb-3">
+              <label class="form-label">Upload Video</label>
+              <div class="form-text mb-2">
+                MP4 or MOV. Max 75 MB. {{ videoCount }}/{{ MAX_VIDEO }} video.
+              </div>
+              @if (videoCount < MAX_VIDEO) {
+                <input
+                  type="file"
+                  class="form-control"
+                  accept="video/mp4,video/quicktime,.mov"
+                  (change)="onFilesSelected($event)">
+              }
             </div>
-          </form>
-        </div>
+
+            @if (selectedFiles().length > 0) {
+              <div class="file-previews">
+                @for (fp of selectedFiles(); track fp.previewUrl; let i = $index) {
+                  <div class="file-preview">
+                    @if (fp.type === 'IMAGE') {
+                      <img [src]="fp.previewUrl" [alt]="fp.file.name" class="file-preview-img">
+                    } @else {
+                      <video [src]="fp.previewUrl" class="file-preview-img"></video>
+                    }
+                    <button
+                      type="button"
+                      class="file-preview-remove"
+                      (click)="removeFile(i)"
+                      aria-label="Remove file">
+                      <i class="bi bi-x-lg"></i>
+                    </button>
+                    @if (i === 0) {
+                      <span class="file-preview-cover">Cover</span>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          @if (uploadTotal() > 0) {
+            <div class="form-section">
+              <div class="upload-status">
+                @if (uploadDone()) {
+                  <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success fs-5"></i>
+                    <span class="fw-semibold text-success">All {{ uploadTotal() }} files uploaded successfully!</span>
+                  </div>
+                  <div class="progress" style="height: 8px">
+                    <div class="progress-bar bg-success" style="width: 100%"></div>
+                  </div>
+                  <p class="text-muted small mt-2 mb-0">Redirecting to your event...</p>
+                } @else {
+                  <div class="d-flex align-items-center justify-content-between mb-1">
+                    <div class="d-flex align-items-center gap-2">
+                      <span class="spinner-border spinner-border-sm text-primary" role="status"></span>
+                      <span class="fw-medium">Uploading files...</span>
+                    </div>
+                    <span class="fw-semibold small">{{ uploadCompleted() }} / {{ uploadTotal() }}</span>
+                  </div>
+                  <p class="text-muted small mb-2 text-truncate">{{ currentFileName() }}</p>
+
+                  <!-- Overall progress -->
+                  <div class="progress mb-2" style="height: 10px" role="progressbar"
+                    [attr.aria-valuenow]="uploadCompleted()"
+                    aria-valuemin="0"
+                    [attr.aria-valuemax]="uploadTotal()">
+                    <div
+                      class="progress-bar progress-bar-striped progress-bar-animated"
+                      [style.width.%]="((uploadCompleted() + (currentFilePercent() / 100)) / uploadTotal()) * 100">
+                    </div>
+                  </div>
+
+                  <!-- Per-file progress -->
+                  <div class="d-flex align-items-center gap-2">
+                    <div class="progress flex-grow-1" style="height: 4px">
+                      <div class="progress-bar bg-info" [style.width.%]="currentFilePercent()"></div>
+                    </div>
+                    <span class="text-muted" style="font-size: 0.7rem; min-width: 32px">{{ currentFilePercent() }}%</span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          <div class="form-actions">
+            <button
+              type="submit"
+              class="btn btn-primary btn-lg"
+              [disabled]="submitting()">
+              @if (submitting()) {
+                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+              }
+              <i class="bi bi-check-lg me-1"></i>Publish Event
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline-primary btn-lg"
+              [disabled]="submitting()"
+              (click)="onSubmit(true)">
+              <i class="bi bi-file-earmark me-1"></i>Save as Draft
+            </button>
+            <a routerLink="/events" class="btn btn-outline-secondary btn-lg">Cancel</a>
+          </div>
+        </form>
       </div>
     </div>
   </div>

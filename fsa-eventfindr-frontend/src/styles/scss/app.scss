@@ -7,62 +7,358 @@
 // Bootstrap Icons
 @import 'bootstrap-icons/font/bootstrap-icons.css';
 
-// ── App-wide custom styles ──
+// ── Design System ──────────────────────────────
 
 :root {
   --ef-primary: #{$ef-primary};
   --ef-primary-light: #{$ef-primary-light};
   --ef-primary-dark: #{$ef-primary-dark};
   --ef-primary-50: #{$ef-primary-50};
+  --ef-primary-100: #{$ef-primary-100};
   --ef-primary-200: #{$ef-primary-200};
   --ef-primary-700: #{$ef-primary-700};
   --ef-accent: #{$ef-accent};
   --ef-accent-soft: #{$ef-accent-soft};
   --ef-accent-strong: #{$ef-accent-strong};
   --ef-bg: #{$ef-bg};
+  --ef-surface: #{$ef-surface};
   --ef-surface-warm: #{$ef-surface-warm};
   --ef-border-subtle: #{$ef-border-subtle};
+  --ef-border-light: #{$ef-border-light};
   --ef-text: #{$ef-text};
   --ef-text-muted: #{$ef-text-muted};
+  --ef-text-light: #{$ef-text-light};
+  --ef-shadow-xs: #{$ef-shadow-xs};
+  --ef-shadow-sm: #{$ef-shadow-sm};
+  --ef-shadow-md: #{$ef-shadow-md};
+  --ef-shadow-lg: #{$ef-shadow-lg};
+  --ef-shadow-xl: #{$ef-shadow-xl};
+  --ef-radius-sm: #{$ef-radius-sm};
+  --ef-radius-md: #{$ef-radius-md};
+  --ef-radius-lg: #{$ef-radius-lg};
+  --ef-radius-xl: #{$ef-radius-xl};
   --ef-card-bg: #ffffff;
   --app-navbar-height: 64px;
 }
 
+// ── Dark Mode Overrides ────────────────────────
+[data-bs-theme="dark"] {
+  --ef-bg: #0f1117;
+  --ef-surface: #1a1d27;
+  --ef-surface-warm: #1e2233;
+  --ef-card-bg: #1a1d27;
+  --ef-text: #e5e7eb;
+  --ef-text-muted: #9ca3af;
+  --ef-text-light: #6b7280;
+  --ef-border-subtle: #2d3348;
+  --ef-border-light: #232839;
+  --ef-primary: #a78bfa;
+  --ef-primary-light: #8b5cf6;
+  --ef-primary-dark: #7c3aed;
+  --ef-primary-50: #1e1533;
+  --ef-primary-100: #2a1f4e;
+  --ef-primary-200: #3d2d6b;
+  --ef-primary-700: #c4b5fd;
+  --ef-accent-soft: rgba(217, 119, 6, 0.15);
+  --ef-accent-strong: #f59e0b;
+  --ef-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --ef-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --ef-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  --ef-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+  --ef-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+
+  color-scheme: dark;
+
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--ef-text);
+  }
+
+  .form-label {
+    color: var(--ef-text);
+  }
+
+  .form-control, .form-select {
+    background-color: var(--ef-surface);
+    color: var(--ef-text);
+    border-color: var(--ef-border-subtle);
+  }
+
+  .input-group-text {
+    background-color: var(--ef-surface);
+    color: var(--ef-text-muted);
+    border-color: var(--ef-border-subtle);
+  }
+
+  .text-body {
+    color: var(--ef-text) !important;
+  }
+
+  .text-muted {
+    color: var(--ef-text-muted) !important;
+  }
+
+  .card {
+    background: var(--ef-card-bg);
+    border-color: var(--ef-border-subtle);
+  }
+
+  .card-body, .card-footer {
+    color: var(--ef-text);
+  }
+
+  .nav-tabs {
+    border-bottom-color: var(--ef-border-subtle);
+
+    .nav-link {
+      color: var(--ef-text-muted);
+
+      &:hover {
+        border-color: var(--ef-border-subtle);
+      }
+
+      &.active {
+        background-color: var(--ef-surface);
+        color: var(--ef-primary);
+        border-color: var(--ef-border-subtle) var(--ef-border-subtle) var(--ef-surface);
+      }
+    }
+  }
+
+  .btn-outline-primary {
+    color: var(--ef-primary);
+    border-color: var(--ef-primary);
+  }
+
+  .btn-outline-secondary {
+    color: var(--ef-text-muted);
+    border-color: var(--ef-border-subtle);
+
+    &:hover {
+      background-color: var(--ef-border-subtle);
+      border-color: var(--ef-border-subtle);
+      color: var(--ef-text);
+    }
+  }
+
+  .breadcrumb-item + .breadcrumb-item::before {
+    color: var(--ef-text-light);
+  }
+
+  .breadcrumb-item.active {
+    color: var(--ef-text-muted);
+  }
+
+  .text-primary {
+    color: var(--ef-primary) !important;
+  }
+
+  .text-success {
+    color: #34d399 !important;
+  }
+
+  .badge.bg-secondary {
+    background-color: var(--ef-border-subtle) !important;
+    color: var(--ef-text) !important;
+  }
+
+  // Keep original vivid purple for solid backgrounds (buttons, avatars, logos)
+  .btn-primary {
+    background-color: #7c3aed;
+    border-color: #7c3aed;
+
+    &:hover, &:focus-visible {
+      background-color: #6d28d9;
+      border-color: #6d28d9;
+    }
+  }
+
+  .btn-outline-primary:hover,
+  .btn-outline-primary:focus-visible {
+    background-color: #7c3aed;
+    border-color: #7c3aed;
+  }
+
+  .bg-primary {
+    background-color: #7c3aed !important;
+  }
+
+  .badge.bg-primary {
+    background-color: #7c3aed !important;
+  }
+}
+
+// ── Base ────────────────────────────────────────
+
 html, body {
   height: 100%;
   margin: 0;
+  background-color: var(--ef-bg);
+  color: var(--ef-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .app-main-offset {
   padding-top: calc(var(--app-navbar-height) - 0.5px);
 }
 
+// ── Prevent text cursor on non-editable elements ──
+
+*, *::before, *::after {
+  cursor: inherit;
+}
+
+html {
+  cursor: default;
+}
+
+a, button, [role="button"], label, select, summary, [tabindex]:not([tabindex="-1"]) {
+  cursor: pointer;
+}
+
+input, textarea, [contenteditable="true"] {
+  cursor: text;
+}
+
+// ── Typography ──────────────────────────────────
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Bricolage Grotesque', 'Segoe UI', sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.display-1, .display-2, .display-3, .display-4 {
+  letter-spacing: -0.03em;
+  font-weight: 800;
+}
+
+// ── Entrance Animations ────────────────────────
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.anim-fade-in-up {
+  animation: fadeInUp 0.6s ease-out both;
+}
+
+.anim-scale-in {
+  animation: scaleIn 0.5s ease-out both;
+}
+
+@for $i from 1 through 12 {
+  .anim-delay-#{$i} {
+    animation-delay: #{$i * 0.07}s;
+  }
+}
+
+// ── Scroll Reveal ──────────────────────────────
+
+.reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+// ── Links ───────────────────────────────────────
+
 a {
   color: var(--ef-primary);
   text-decoration: none;
+  transition: color 0.15s ease;
   &:hover {
     color: var(--ef-primary-dark);
   }
 }
 
+// ── Buttons ─────────────────────────────────────
+
+.btn {
+  transition: all 0.2s ease;
+  letter-spacing: 0.01em;
+}
+
 .btn-primary {
   background-color: var(--ef-primary);
   border-color: var(--ef-primary);
-  &:hover {
+  &:hover, &:focus-visible {
     background-color: var(--ef-primary-dark);
     border-color: var(--ef-primary-dark);
+    box-shadow: 0 4px 16px rgba($ef-primary, 0.35);
+    transform: translateY(-1px);
+  }
+  &:active {
+    transform: translateY(0);
   }
 }
 
 .btn-outline-primary {
   color: var(--ef-primary);
   border-color: var(--ef-primary);
-  &:hover {
+  &:hover, &:focus-visible {
     background-color: var(--ef-primary);
     border-color: var(--ef-primary);
     color: #fff;
+    box-shadow: 0 4px 12px rgba($ef-primary, 0.3);
   }
 }
+
+.btn-lg {
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+}
+
+// ── Cards ───────────────────────────────────────
+
+.card {
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  border-color: var(--ef-border-subtle);
+  background: var(--ef-card-bg);
+}
+
+// ── Text overrides ──────────────────────────────
 
 .text-primary {
   color: var(--ef-primary) !important;
@@ -72,8 +368,10 @@ a {
   background-color: var(--ef-primary) !important;
 }
 
+// ── Badges ──────────────────────────────────────
+
 .badge-attending {
-  background-color: #198754;
+  background-color: #059669;
   color: #fff;
 }
 
@@ -82,7 +380,62 @@ a {
   color: #212529;
 }
 
-// EventfindR utility classes: .bg-ef-*, .text-ef-*, .border-ef-*
+.badge {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+// ── Focus styles ────────────────────────────────
+
+*:focus-visible {
+  outline: 2px solid var(--ef-primary-light);
+  outline-offset: 2px;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--ef-primary-light);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+// ── Form controls ───────────────────────────────
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--ef-primary-light);
+  box-shadow: 0 0 0 3px rgba($ef-primary, 0.12);
+}
+
+.form-label {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--ef-text);
+  margin-bottom: 0.375rem;
+}
+
+// ── Section spacing ─────────────────────────────
+
+.section-header {
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
+
+.section-header h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  margin-bottom: 0.5rem;
+}
+
+.section-header p {
+  color: var(--ef-text-muted);
+  font-size: 1.0625rem;
+  max-width: 480px;
+  margin-inline: auto;
+}
+
+// ── EventfindR utility classes ──────────────────
+
 $ef-theme-colors: (
   'primary': $ef-primary,
   'primary-light': $ef-primary-light,
@@ -112,4 +465,99 @@ $ef-theme-colors: (
   .border-ef-#{$name} {
     border-color: $color !important;
   }
+}
+
+// ── Utility ─────────────────────────────────────
+
+.clickable {
+  cursor: pointer;
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--ef-shadow-lg);
+}
+
+.transition-all {
+  transition: all 0.2s ease;
+}
+
+// ── Noise Texture Overlay ──────────────────────
+
+.noise-overlay {
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.035;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 128px 128px;
+    z-index: 0;
+  }
+
+  > * {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+// ── Enhanced card glow on hover ────────────────
+
+.card-glow {
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    background: radial-gradient(
+      600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      rgba($ef-primary, 0.08),
+      transparent 40%
+    );
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  &:hover::before {
+    opacity: 1;
+  }
+
+  > * {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+// ── Gradient text utility ──────────────────────
+
+.gradient-text {
+  background: linear-gradient(135deg, var(--ef-primary-light), var(--ef-accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+// ── Section divider ────────────────────────────
+
+.section-divider {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--ef-border-subtle) 20%,
+    var(--ef-primary-200) 50%,
+    var(--ef-border-subtle) 80%,
+    transparent
+  );
+  border: none;
+  margin: 0;
 }

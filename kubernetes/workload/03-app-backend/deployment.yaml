@@ -12,18 +12,14 @@ spec:
     metadata:
       labels:
         app: eventfindr-be
-      annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "8080"
-        prometheus.io/path: "/actuator/prometheus"
     spec:
       containers:
         - name: eventfindr-be
-          # Zameni acrfsa<your-prefix> za tvoj ACR registry
+          # Pred produkcnym deployom nastav vlastny ACR registry a idealne immutable image tag.
           image: acrfsavojtkom.azurecr.io/fsa-eventfindr-backend:latest
           imagePullPolicy: Always
           env:
-            # Database credentials z K8s secrets
+            # Databazove udaje prichadzaju iba z Kubernetes Secretu.
             - name: DB_URL
               valueFrom:
                 secretKeyRef:
@@ -39,13 +35,11 @@ spec:
                 secretKeyRef:
                   name: postgres-secret
                   key: db_password
-            # Keycloak OIDC configuration
-            # Zameni <IP> za IP adresu ingress-nginx v nip.io časti
+            # Keycloak URL musi presne sediet s issuerom v tokene.
             - name: ISSUER_URI
               value: https://keycloak.20.223.129.102.nip.io/realms/EventfindR
             - name: JWT_URI
               value: https://keycloak.20.223.129.102.nip.io/realms/EventfindR/protocol/openid-connect/certs
-            # Spring Boot JAVA_OPTS
             - name: JAVA_OPTS
               value: >-
                 -Dspring.profiles.active=keycloak
@@ -64,24 +58,30 @@ spec:
           ports:
             - name: http
               containerPort: 8080
-          # Health checks sú zakomentované, dokýmaž nemáš /actuator/health endpoint
-          # Keď ho implementuješ, rozhomentiš tieto
-          # livenessProbe:
-          #   initialDelaySeconds: 60
-          #   periodSeconds: 10
-          #   timeoutSeconds: 5
-          #   successThreshold: 1
-          #   failureThreshold: 5
-          #   httpGet:
-          #     path: /actuator/health
-          #     port: http
-          # readinessProbe:
-          #   initialDelaySeconds: 60
-          #   periodSeconds: 10
-          #   timeoutSeconds: 5
-          #   successThreshold: 1
-          #   failureThreshold: 5
-          #   httpGet:
-          #     path: /actuator/health
-          #     port: http
-
+          volumeMounts:
+            - name: media-storage
+              mountPath: /application/media-storage
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            failureThreshold: 30
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+      volumes:
+        - name: media-storage
+          persistentVolumeClaim:
+            claimName: eventfindr-media-storage

@@ -4,8 +4,12 @@ public class User {
 
     private Long id;
     private String name;
-    private UserRole rola;
+    private UserRole role;
     private String email;
+    private String organizationName;
+    private String organizationDescription;
+    private String artistName;
+    private String artistDescription;
 
     public Long getId() {
         return id;
@@ -23,12 +27,12 @@ public class User {
         this.name = name;
     }
 
-    public UserRole getRola() {
-        return rola;
+    public UserRole getRole() {
+        return role;
     }
 
-    public void setRola(UserRole rola) {
-        this.rola = rola;
+    public void setRole(UserRole role) {
+        this.role = role;
     }
 
     public String getEmail() {
@@ -37,5 +41,37 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getOrganizationName() {
+        return organizationName;
+    }
+
+    public void setOrganizationName(String organizationName) {
+        this.organizationName = organizationName;
+    }
+
+    public String getOrganizationDescription() {
+        return organizationDescription;
+    }
+
+    public void setOrganizationDescription(String organizationDescription) {
+        this.organizationDescription = organizationDescription;
+    }
+
+    public String getArtistName() {
+        return artistName;
+    }
+
+    public void setArtistName(String artistName) {
+        this.artistName = artistName;
+    }
+
+    public String getArtistDescription() {
+        return artistDescription;
+    }
+
+    public void setArtistDescription(String artistDescription) {
+        this.artistDescription = artistDescription;
     }
 }

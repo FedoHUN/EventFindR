@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.util.Date;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -16,7 +17,7 @@ class EventTest {
         Event event = new Event();
         event.setName("  Pohoda Festival  ");
         event.setDescription("  Popis  ");
-        event.setLocation("  Trenčín  ");
+        event.setLocation("  Trencin  ");
         event.setEventDate(new Date());
         event.setOrganizer(organizer());
 
@@ -24,7 +25,7 @@ class EventTest {
 
         assertEquals("Pohoda Festival", event.getName());
         assertEquals("Popis", event.getDescription());
-        assertEquals("Trenčín", event.getLocation());
+        assertEquals("Trencin", event.getLocation());
         assertNotNull(event.getCreated());
     }
 
@@ -54,7 +55,7 @@ class EventTest {
         EventfindrException ex = assertThrows(EventfindrException.class, event::prepareForCreation);
 
         assertEquals(EventfindrException.Type.VALIDATION, ex.getType());
-        assertEquals("Názov eventu je povinný údaj", ex.getMessage());
+        assertEquals("Event name is required", ex.getMessage());
     }
 
     @Test
@@ -68,59 +69,51 @@ class EventTest {
         EventfindrException ex = assertThrows(EventfindrException.class, event::prepareForCreation);
 
         assertEquals(EventfindrException.Type.VALIDATION, ex.getType());
-        assertEquals("Miesto konania je povinný údaj", ex.getMessage());
+        assertEquals("Event location is required", ex.getMessage());
     }
 
     @Test
     void prepareForCreationFailsWhenEventDateMissing() {
         Event event = new Event();
         event.setName("Pohoda");
-        event.setLocation("Trenčín");
+        event.setLocation("Trencin");
         event.setEventDate(null);
         event.setOrganizer(organizer());
 
         EventfindrException ex = assertThrows(EventfindrException.class, event::prepareForCreation);
 
         assertEquals(EventfindrException.Type.VALIDATION, ex.getType());
-        assertEquals("Dátum konania je povinný údaj", ex.getMessage());
+        assertEquals("Event date is required", ex.getMessage());
     }
 
     @Test
     void prepareForCreationFailsWhenOrganizerMissing() {
         Event event = new Event();
         event.setName("Pohoda");
-        event.setLocation("Trenčín");
+        event.setLocation("Trencin");
         event.setEventDate(new Date());
         event.setOrganizer(null);
 
         EventfindrException ex = assertThrows(EventfindrException.class, event::prepareForCreation);
 
         assertEquals(EventfindrException.Type.VALIDATION, ex.getType());
-        assertEquals("Organizátor eventu je povinný údaj", ex.getMessage());
+        assertEquals("Event organizer is required", ex.getMessage());
     }
 
     @Test
     void prepareForCreationFailsWhenPriceIsNegative() {
-        Event event = new Event();
-        event.setName("Pohoda");
-        event.setLocation("Trenčín");
-        event.setEventDate(new Date());
-        event.setOrganizer(organizer());
+        Event event = validEvent();
         event.setPrice(BigDecimal.valueOf(-10));
 
         EventfindrException ex = assertThrows(EventfindrException.class, event::prepareForCreation);
 
         assertEquals(EventfindrException.Type.VALIDATION, ex.getType());
-        assertEquals("Cena nemôže byť záporná", ex.getMessage());
+        assertEquals("Event price cannot be negative", ex.getMessage());
     }
 
     @Test
     void prepareForCreationAcceptsZeroPrice() {
-        Event event = new Event();
-        event.setName("Free Event");
-        event.setLocation("Bratislava");
-        event.setEventDate(new Date());
-        event.setOrganizer(organizer());
+        Event event = validEvent();
         event.setPrice(BigDecimal.ZERO);
 
         event.prepareForCreation();
@@ -130,23 +123,74 @@ class EventTest {
 
     @Test
     void prepareForCreationAcceptsNullPrice() {
+        assertDoesNotThrow(() -> validEvent().prepareForCreation());
+    }
+
+    @Test
+    void cancelAllowsOrganizer() {
+        Event event = validEvent();
+
+        event.cancel(organizer());
+
+        assertEquals(true, event.isCanceled());
+    }
+
+    @Test
+    void restoreAllowsAdmin() {
+        Event event = validEvent();
+        event.setCanceled(true);
+
+        event.restore(user(99L, UserRole.ADMIN));
+
+        assertEquals(false, event.isCanceled());
+    }
+
+    @Test
+    void publishRejectsUnrelatedUser() {
+        Event event = validEvent();
+
+        EventfindrException ex = assertThrows(EventfindrException.class, () -> event.publish(user(42L, UserRole.USER)));
+
+        assertEquals(EventfindrException.Type.FORBIDDEN, ex.getType());
+        assertEquals("Only the organizer or an admin can publish an event", ex.getMessage());
+    }
+
+    @Test
+    void toggleFeaturedRequiresAdmin() {
+        Event event = validEvent();
+
+        EventfindrException ex = assertThrows(EventfindrException.class, () -> event.toggleFeatured(organizer()));
+
+        assertEquals(EventfindrException.Type.FORBIDDEN, ex.getType());
+        assertEquals("Only an admin can mark an event as featured", ex.getMessage());
+    }
+
+    @Test
+    void isOwnedByMatchesOrganizerIdentity() {
+        Event event = validEvent();
+
+        assertEquals(true, event.isOwnedBy(organizer()));
+    }
+
+    private Event validEvent() {
         Event event = new Event();
-        event.setName("Free Event");
+        event.setName("Pohoda");
         event.setLocation("Bratislava");
         event.setEventDate(new Date());
         event.setOrganizer(organizer());
-        event.setPrice(null);
-
-        event.prepareForCreation();
-
+        return event;
     }
 
     private User organizer() {
+        return user(1L, UserRole.ORGANIZER);
+    }
+
+    private User user(Long id, UserRole role) {
         User user = new User();
-        user.setId(1L);
-        user.setName("Organizer");
-        user.setEmail("org@eventfindr.sk");
-        user.setRola(UserRole.ORGANIZER);
+        user.setId(id);
+        user.setName("user-" + id);
+        user.setEmail("user" + id + "@eventfindr.sk");
+        user.setRole(role);
         return user;
     }
 }

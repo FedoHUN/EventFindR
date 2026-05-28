@@ -1,8 +1,6 @@
 package sk.eventfindr.fsa.domain.service;
 
-import sk.eventfindr.fsa.domain.AttendanceStatus;
 import sk.eventfindr.fsa.domain.Event;
-import sk.eventfindr.fsa.domain.EventAttendance;
 
 import java.util.Collection;
 
@@ -10,15 +8,21 @@ public interface EventFacade {
 
     Collection<Event> readAll();
 
+    Collection<Event> readAllPublished();
+
     Event getById(Long id);
 
-    void create(Event event);
+    Long create(Event event);
 
-    void attend(Long eventId, Long userId, String status);
+    void update(Event event, Long userId);
 
-    void unattend(Long eventId, Long userId);
+    void cancelEvent(Long eventId, Long userId);
 
-    AttendanceStatus getAttendanceStatus(Long eventId, Long userId);
+    void restoreEvent(Long eventId, Long userId);
 
-    Collection<EventAttendance> getAttendancesByUser(Long userId);
+    void deleteEvent(Long eventId, Long userId);
+
+    void publishEvent(Long eventId, Long userId);
+
+    void toggleFeatured(Long eventId, Long userId);
 }

@@ -1,25 +1,33 @@
-.idea
-.claude
+.idea/
+.ai/
+.claude/
 
-# AI-generated and support documentation (not part of production code)
-DEVOPS-SETUP.md
-DEVOPS-CHECKLIST.md
-DEVOPS-INDEX.md
-DEVOPS-MANIFEST.md
-GET-STARTED.md
-INDEX.md
-JAVA_VERSION_ALIGNMENT.md
-QUICKSTART.md
-READY.md
-TLDR.md
-README-attendance-toggle.md
+# Documentation generated during development. Keep only the root README.md in git.
+*.md
+!/README.md
+fsa-eventfindr-backend/HELP.md
+fsa-eventfindr-frontend/README.md
+kubernetes/README.md
+
+# Project-review and AI-agent artifacts.
+CLAUDE.md
+compiled-coalescing-lagoon.md
+backend-hardening-change-log-*.md
+REFACTORING-PRIORITIES.md
+UPDATES.md
 
 # kubectl export dumps
 eventfindr-be.yaml
 
+# Local runtime uploads; production must use persistent storage, not git.
+fsa-eventfindr-backend/media-storage/
+media-storage/
+
 # Environment / secrets (never commit real credentials)
 .env
 *.env.local
+kubernetes/workload/02-secrets.local.yaml
+*.secret.yaml
 
 # OS files
 .DS_Store
@@ -27,3 +35,7 @@ Thumbs.db
 
 # Example projects (reference only, not deployed)
 example/
+
+# Root-level generated diagrams and local reports.
+/Class-diagram.png
+/Class-diagram.puml

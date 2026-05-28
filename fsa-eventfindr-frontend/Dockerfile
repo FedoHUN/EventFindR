@@ -2,38 +2,31 @@ FROM node:22.14 AS build
 
 WORKDIR /app
 
-# Upgrade npm to match packageManager field in package.json
+# Zjednoti verziu npm s hodnotou packageManager v package.json.
 RUN npm install -g npm@10.4.0
 
-# Copy package.json and package-lock.json
+# Dependency manifesty kopirujeme samostatne, aby Docker vedel cacheovat npm ci.
 COPY package*.json ./
-
-# Install project dependencies
 RUN npm ci
 
-# Copy the entire project
 COPY . .
 
-# Build the Angular app for production
+# Produkcny Angular build generuje staticke subory do dist/.
 RUN npm run build
 
-# Production image — use Nginx to serve Angular app
 FROM nginx:alpine
 
-# Copy custom Nginx configuration
 COPY nginx.conf /etc/nginx/nginx.conf
 
-# Remove default nginx page, then copy Angular build output
+# Nginx image nahradi defaultnu stranku build vystupom aplikacie.
 RUN rm -rf /usr/share/nginx/html/*
 COPY --from=build /app/dist/fsa-eventfindr-frontend/browser /usr/share/nginx/html
-# Angular SSR builds produce index.csr.html instead of index.html
+
+# Angular SSR build moze vytvorit index.csr.html; Nginx ocakava index.html.
 RUN if [ ! -f /usr/share/nginx/html/index.html ]; then \
       cp /usr/share/nginx/html/index.csr.html /usr/share/nginx/html/index.html; \
     fi
 
-# Expose port 80
 EXPOSE 80
 
-# Start Nginx
 CMD ["nginx", "-g", "daemon off;"]
-

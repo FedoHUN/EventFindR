@@ -1,4 +1,290 @@
+// Globalne pravidla nacitane po hlavnom dizajnovom systeme.
 
-.clickable {
-  cursor: pointer;
+::selection {
+  background-color: rgba(111, 66, 193, 0.15);
+  color: inherit;
+}
+
+// Zakladna ochrana pred horizontalnym pretekanim na malych obrazovkach.
+html {
+  scroll-behavior: smooth;
+  overflow-x: clip;
+}
+
+body {
+  overflow-x: clip;
+}
+
+img,
+video,
+canvas,
+svg {
+  max-width: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+@media (max-width: 575.98px) {
+  .container {
+    padding-inline: 0.75rem;
+  }
+
+  .py-5 {
+    padding-top: 1.5rem !important;
+    padding-bottom: 1.5rem !important;
+  }
+
+  .row.g-4 {
+    --bs-gutter-x: 0.625rem;
+    --bs-gutter-y: 0.625rem;
+  }
+
+  .row.g-3 {
+    --bs-gutter-x: 0.5rem;
+    --bs-gutter-y: 0.5rem;
+  }
+
+  .section-header {
+    margin-bottom: 1.25rem;
+  }
+
+  .section-header h2 {
+    font-size: 1.4rem;
+  }
+
+  .section-header p {
+    font-size: 0.875rem;
+  }
+
+  .btn-lg {
+    padding: 0.5rem 1.25rem;
+    font-size: 0.9rem;
+  }
+
+  app-home {
+    display: block;
+    overflow-x: clip;
+  }
+
+  app-home .hero {
+    min-height: 380px;
+    padding: 5rem 0 2.5rem;
+  }
+
+  app-home .hero-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  app-home .hero-title {
+    font-size: clamp(1.75rem, 10vw, 2.5rem);
+    margin-bottom: 1rem;
+  }
+
+  app-home .hero-subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 1.25rem;
+    line-height: 1.5;
+  }
+
+  app-home .hero-btn-primary,
+  app-home .hero-btn-secondary {
+    width: 100%;
+    padding: 0.625rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  app-home .event-card,
+  app-home .trending-card {
+    border-radius: var(--ef-radius-md);
+  }
+
+  app-home .event-card:hover,
+  app-home .trending-card:hover {
+    transform: none;
+  }
+
+  app-home .event-card-img-wrap,
+  app-home .trending-card-placeholder {
+    height: 100px;
+  }
+
+  app-home .event-card .card-body,
+  app-home .trending-card .card-body {
+    padding: 0.5rem;
+  }
+
+  app-home .card-title {
+    font-size: 0.82rem;
+    line-height: 1.15;
+    margin-bottom: 0.25rem !important;
+  }
+
+  app-home .event-date-badge,
+  app-home .event-price-badge,
+  app-home .genre-badge,
+  app-home .capacity-badge {
+    font-size: 0.58rem;
+    padding: 0.125rem 0.3rem;
+  }
+
+  app-home .event-card .card-body p,
+  app-home .trending-card .card-body p,
+  app-home .card-rating,
+  app-home .trending-stat {
+    font-size: 0.68rem;
+    margin-bottom: 0.125rem !important;
+  }
+
+  app-home .trending-rank {
+    width: 24px;
+    height: 24px;
+    font-size: 0.65rem;
+    top: 8px;
+    left: 8px;
+  }
+
+  app-home .organizer-card .card-body {
+    padding: 0.75rem 0.5rem;
+  }
+
+  app-home .organizer-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+    margin-bottom: 0.5rem !important;
+  }
+
+  app-home .organizer-badge {
+    font-size: 0.6rem;
+  }
+
+  app-home .cta-card {
+    padding: 1.25rem;
+    border-radius: var(--ef-radius-md);
+  }
+
+  app-home .cta-card h2 {
+    font-size: 1.25rem;
+  }
+
+  app-home .cta-card p {
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  app-event-detail {
+    display: block;
+    overflow-x: clip;
+  }
+
+  app-event-detail .detail-hero-img {
+    height: 220px;
+  }
+
+  app-event-detail .detail-hero-img.placeholder-img {
+    height: 160px;
+  }
+
+  app-event-detail .gallery-viewport {
+    height: 220px;
+  }
+
+  app-event-detail .gallery-arrow {
+    width: 32px;
+    height: 32px;
+    font-size: 0.875rem;
+  }
+
+  app-event-detail .detail-hero-body {
+    padding: 1rem;
+  }
+
+  app-event-detail .detail-title {
+    font-size: 1.35rem;
+    margin-bottom: 0.5rem;
+  }
+
+  app-event-detail .detail-description {
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+
+  app-event-detail .countdown-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.625rem;
+  }
+
+  app-event-detail .sidebar-card,
+  app-event-detail .attendance-section,
+  app-event-detail .comments-section,
+  app-event-detail .similar-section {
+    padding: 1rem;
+    border-radius: var(--ef-radius-md);
+  }
+
+  app-event-detail .detail-sidebar {
+    position: static;
+  }
+
+  app-event-detail .sidebar-card-title {
+    font-size: 0.75rem;
+    margin-bottom: 0.875rem;
+  }
+
+  app-event-detail .detail-item-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 0.75rem;
+  }
+
+  app-event-detail .detail-item-label {
+    font-size: 0.675rem;
+  }
+
+  app-event-detail .detail-item-value {
+    font-size: 0.8125rem;
+    overflow-wrap: anywhere;
+  }
+
+  app-event-detail .organizer-link {
+    overflow-wrap: anywhere;
+  }
+
+  app-event-detail .similar-img-wrap {
+    height: 80px;
+  }
+
+  app-event-detail .similar-card .card-body {
+    padding: 0.375rem;
+  }
+
+  app-event-detail .similar-card .card-body p {
+    font-size: 0.7rem;
+  }
+
+  app-event-detail .comment-item {
+    gap: 0.5rem;
+  }
+
+  app-event-detail .comment-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 0.75rem;
+  }
+
+  app-event-detail .ticket-btn {
+    font-size: 0.9rem;
+    padding: 0.625rem 1rem;
+  }
+
+  app-event-detail .login-prompt {
+    padding: 1rem;
+  }
 }

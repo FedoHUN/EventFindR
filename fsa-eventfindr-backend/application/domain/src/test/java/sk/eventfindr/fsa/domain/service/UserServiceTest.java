@@ -77,7 +77,7 @@ class UserServiceTest {
         user.setId(id);
         user.setName("user-" + id);
         user.setEmail(email);
-        user.setRola(UserRole.USER);
+        user.setRole(UserRole.USER);
         return user;
     }
 }

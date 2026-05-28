@@ -1,5 +1,6 @@
 package sk.eventfindr.fsa.domain;
 
+import java.time.Instant;
 import java.util.Date;
 
 public class EventAttendance {
@@ -9,9 +10,6 @@ public class EventAttendance {
     private User user;
     private AttendanceStatus status;
     private Date created;
-
-    public EventAttendance() {
-    }
 
     public Long getId() {
         return id;
@@ -54,23 +52,27 @@ public class EventAttendance {
     }
 
     public void prepareForCreation() {
+        prepareForCreation(Instant.now());
+    }
+
+    public void prepareForCreation(Instant now) {
         if (event == null) {
             throw new EventfindrException(
                     EventfindrException.Type.VALIDATION,
-                    "Event je povinný údaj");
+                    "Event is required");
         }
         if (user == null) {
             throw new EventfindrException(
                     EventfindrException.Type.VALIDATION,
-                    "Používateľ je povinný údaj");
+                    "User is required");
         }
         if (status == null) {
             throw new EventfindrException(
                     EventfindrException.Type.VALIDATION,
-                    "Status účasti je povinný údaj");
+                    "Attendance status is required");
         }
         if (created == null) {
-            created = new Date();
+            created = Date.from(now);
         }
     }
 }

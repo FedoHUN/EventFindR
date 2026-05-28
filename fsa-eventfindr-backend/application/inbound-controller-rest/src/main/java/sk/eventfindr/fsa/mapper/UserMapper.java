@@ -14,6 +14,10 @@ public interface UserMapper {
     UserDto toDto(User user);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "organizationName", ignore = true)
+    @Mapping(target = "organizationDescription", ignore = true)
+    @Mapping(target = "artistName", ignore = true)
+    @Mapping(target = "artistDescription", ignore = true)
     User toEntity(CreateUserRequestDto request);
 
     default UserRoleDto map(UserRole value) {

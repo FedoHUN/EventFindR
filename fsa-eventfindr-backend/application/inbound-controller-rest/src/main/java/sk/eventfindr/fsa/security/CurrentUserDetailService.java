@@ -1,13 +1,11 @@
 package sk.eventfindr.fsa.security;
 
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import sk.eventfindr.fsa.domain.EventfindrException;
 import sk.eventfindr.fsa.domain.User;
 import sk.eventfindr.fsa.domain.service.UserFacade;
-import sk.eventfindr.fsa.rest.dto.UserDto;
-
-import sk.eventfindr.fsa.domain.UserRole;
 
 import java.util.List;
 
@@ -20,11 +18,12 @@ public class CurrentUserDetailService {
         this.userFacade = userFacade;
     }
 
-    public UserDto getCurrentUser() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    public AuthenticatedUser getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Object principal = authentication == null ? null : authentication.getPrincipal();
 
-        if (principal instanceof UserDto) {
-            return (UserDto) principal;
+        if (principal instanceof AuthenticatedUser user) {
+            return user;
         }
 
         throw new EventfindrException(
@@ -34,21 +33,22 @@ public class CurrentUserDetailService {
     }
 
     public String getUserEmail() {
-        return getCurrentUser().getEmail();
+        return getCurrentUser().email();
     }
 
     public User getFullCurrentUser() {
-        UserDto jwt = getCurrentUser();
-        User user = userFacade.get(jwt.getEmail());
-        if (user == null) {
+        AuthenticatedUser jwt = getCurrentUser();
+        return userFacade.get(jwt.email()).orElseGet(() -> {
             // Auto-register user from Keycloak JWT on first login
             User newUser = new User();
-            newUser.setEmail(jwt.getEmail());
-            newUser.setName(jwt.getName());
-            newUser.setRola(jwt.getRola() != null ? UserRole.valueOf(jwt.getRola().name()) : UserRole.USER);
+            newUser.setEmail(jwt.email());
+            newUser.setName(jwt.name());
+            newUser.setRole(jwt.effectiveRole());
             userFacade.create(newUser);
-            user = userFacade.get(jwt.getEmail());
-        }
-        return user;
+            return userFacade.get(jwt.email())
+                    .orElseThrow(() -> new EventfindrException(
+                            EventfindrException.Type.NOT_FOUND,
+                            "Failed to register user"));
+        });
     }
 }

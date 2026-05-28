@@ -269,9 +269,44 @@ components:
         imageUrl:
           type: string
           description: URL obrázku eventu
-        performers:
+        genre:
           type: string
-          description: Mená vystupujúcich umelcov
+          description: Žáner eventu
+        status:
+          type: string
+          enum:
+            - DRAFT
+            - PUBLISHED
+          description: Stav eventu
+        featured:
+          type: boolean
+          description: Či je event zvýraznený
+        canceled:
+          type: boolean
+          description: Či je event zrušený
+        attendingCount:
+          type: integer
+          readOnly: true
+        watchingCount:
+          type: integer
+          readOnly: true
+        commentCount:
+          type: integer
+          readOnly: true
+        capacity:
+          type: integer
+          description: Maximálna kapacita (null = neobmedzená)
+        averageRating:
+          type: number
+          format: double
+          readOnly: true
+        ratingCount:
+          type: integer
+          readOnly: true
+        artists:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventArtist'
         created:
           type: string
           format: date-time
@@ -314,9 +349,22 @@ components:
         imageUrl:
           type: string
           description: URL obrázku eventu (voliteľné)
-        performers:
+        genre:
           type: string
-          description: Mená vystupujúcich umelcov (voliteľné)
+          description: Žáner eventu
+        status:
+          type: string
+          enum:
+            - DRAFT
+            - PUBLISHED
+          description: Stav eventu (DRAFT alebo PUBLISHED)
+        capacity:
+          type: integer
+          description: Maximálna kapacita (voliteľné)
+        artists:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventArtistRequest'
 
     EventsResponse:
       type: object
@@ -348,22 +396,60 @@ components:
           format: int64
         name:
           type: string
-        rola:
+        role:
           $ref: '#/components/schemas/UserRole'
         email:
           type: string
           format: email
+        organizationName:
+          type: string
+          description: Názov organizácie (len pre organizátorov)
+        organizationDescription:
+          type: string
+          description: Popis organizácie (len pre organizátorov)
+        artistName:
+          type: string
+          description: Umelecké meno (len pre umelcov)
+        artistDescription:
+          type: string
+          description: Popis umelca (len pre umelcov)
+
+    EventArtist:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        artistUserId:
+          type: integer
+          format: int64
+        artistName:
+          type: string
+        sortOrder:
+          type: integer
+
+    EventArtistRequest:
+      type: object
+      required:
+        - artistName
+      properties:
+        artistUserId:
+          type: integer
+          format: int64
+        artistName:
+          type: string
+          minLength: 1
 
     CreateUserRequest:
       type: object
       required:
         - name
         - email
-        - rola
+        - role
       properties:
         name:
           type: string
-        rola:
+        role:
           $ref: '#/components/schemas/UserRole'
         email:
           type: string
@@ -374,4 +460,55 @@ components:
       enum:
         - USER
         - ORGANIZER
+        - ARTIST
         - ADMIN
+
+    EventComment:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        eventId:
+          type: integer
+          format: int64
+        user:
+          $ref: '#/components/schemas/User'
+        content:
+          type: string
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        created:
+          type: string
+          format: date-time
+
+    Notification:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        userId:
+          type: integer
+          format: int64
+        eventId:
+          type: integer
+          format: int64
+        type:
+          type: string
+          enum:
+            - EVENT_REMINDER
+            - EVENT_CANCELED
+            - NEW_COMMENT
+            - NEW_FOLLOWER
+            - NEW_EVENT
+            - EVENT_UPDATED
+        message:
+          type: string
+        read:
+          type: boolean
+        created:
+          type: string
+          format: date-time

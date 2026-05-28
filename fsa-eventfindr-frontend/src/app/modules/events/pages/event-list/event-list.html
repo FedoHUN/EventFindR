@@ -1,106 +1,316 @@
-<div class="container py-4">
-  <h1 class="fw-bold mb-4"><i class="bi bi-calendar-range me-2"></i>Events</h1>
+<div class="container py-5">
+  <div class="page-header mb-4">
+    <h1 class="fw-bold">Events</h1>
+    <p class="text-muted">Discover events happening near you</p>
+  </div>
 
-  <div class="card shadow-sm border-0 mb-4">
-    <div class="card-body">
-      <div class="row g-3 align-items-end">
-        <div class="col-md-4">
-          <label for="search" class="form-label fw-semibold">Search</label>
-          <div class="input-group">
-            <span class="input-group-text"><i class="bi bi-search"></i></span>
-            <input
-              type="text"
-              class="form-control"
-              id="search"
-              placeholder="Search events, performers..."
-              [ngModel]="searchQuery()"
-              (ngModelChange)="onSearchInput($event)">
-          </div>
-        </div>
-        <div class="col-md-3">
-          <label for="location" class="form-label fw-semibold">Location</label>
-          <select
-            class="form-select"
-            id="location"
-            [ngModel]="locationFilter()"
-            (ngModelChange)="onLocationChange($event)">
-            <option value="">All locations</option>
-            @for (loc of locations(); track loc) {
-              <option [value]="loc">{{ loc }}</option>
-            }
-          </select>
-        </div>
-        <div class="col-md-3">
-          <label for="date" class="form-label fw-semibold">Date</label>
+  <div class="filter-bar mb-4">
+    <div class="row g-3 align-items-end">
+      <div class="col-xl-3 col-lg-4 col-md-6">
+        <label for="search" class="form-label">Search</label>
+        <div class="input-group">
+          <span class="input-group-text border-end-0">
+            <i class="bi bi-search text-muted"></i>
+          </span>
           <input
-            type="date"
-            class="form-control"
-            id="date"
-            [ngModel]="dateFilter()"
-            (ngModelChange)="onDateChange($event)">
-        </div>
-        <div class="col-md-2">
-          <button class="btn btn-outline-secondary w-100" (click)="clearFilters()">
-            <i class="bi bi-x-circle me-1"></i>Clear
-          </button>
+            type="text"
+            class="form-control border-start-0 ps-0"
+            id="search"
+            placeholder="Search events, artists..."
+            [formControl]="searchControl">
         </div>
       </div>
+      <div class="col-xl col-lg-4 col-md-6">
+        <label for="genre" class="form-label">Genre</label>
+        <select
+          class="form-select"
+          id="genre"
+          [formControl]="genreControl">
+          <option value="">All genres</option>
+          @for (g of genres(); track g) {
+            <option [value]="g">{{ g }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-xl col-lg-4 col-md-6">
+        <label for="location" class="form-label">Location</label>
+        <select
+          class="form-select"
+          id="location"
+          [formControl]="locationControl">
+          <option value="">All locations</option>
+          @for (loc of locations(); track loc) {
+            <option [value]="loc">{{ loc }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-xl col-lg-4 col-md-6">
+        <label for="date" class="form-label">Date</label>
+        <input
+          type="date"
+          class="form-control"
+          id="date"
+          [formControl]="dateControl">
+      </div>
+      <div class="col-xl col-lg-4 col-md-6">
+        <label for="artist" class="form-label">Artist</label>
+        <select
+          class="form-select"
+          id="artist"
+          [formControl]="artistControl">
+          <option value="">All artists</option>
+          @for (a of artists(); track a) {
+            <option [value]="a">{{ a }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-xl col-lg-4 col-md-6">
+        <label for="sortBy" class="form-label">Sort by</label>
+        <select
+          class="form-select"
+          id="sortBy"
+          [formControl]="sortControl">
+          <option value="date">Date</option>
+          <option value="rating">Highest rated</option>
+          <option value="popularity">Most popular</option>
+        </select>
+      </div>
+      <div class="col-xl-auto col-lg-4 col-md-6 d-flex align-items-end">
+        <button class="btn btn-outline-secondary w-100" (click)="clearFilters()">
+          <i class="bi bi-x-lg me-1"></i>Clear
+        </button>
+      </div>
+    </div>
+    <div class="mt-3 pt-3 border-top d-flex flex-wrap gap-2">
+      <button
+        class="btn btn-sm"
+        [class.btn-primary]="showPastEvents()"
+        [class.btn-outline-secondary]="!showPastEvents()"
+        (click)="toggleShowPast()">
+        <i class="bi bi-clock-history me-1"></i>
+        @if (showPastEvents()) {
+          Showing past events
+        } @else {
+          Include past events
+        }
+      </button>
+      @if (auth.user() && followedOrganizerIds().size > 0) {
+        <button
+          class="btn btn-sm"
+          [class.btn-primary]="followingOnly()"
+          [class.btn-outline-primary]="!followingOnly()"
+          (click)="toggleFollowingOnly()">
+          <i class="bi bi-person-heart me-1"></i>
+          @if (followingOnly()) {
+            Showing followed only
+          } @else {
+            From organizers I follow
+          }
+        </button>
+      }
     </div>
   </div>
 
   @if (loading()) {
-    <div class="text-center py-5">
-      <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Loading...</span>
-      </div>
-    </div>
-  } @else if (filteredEvents().length === 0) {
-    <div class="text-center py-5">
-      <i class="bi bi-search display-1 text-muted"></i>
-      <p class="text-muted mt-3 fs-5">No events found matching your filters.</p>
-      <button class="btn btn-primary" (click)="clearFilters()">Clear Filters</button>
-    </div>
-  } @else {
-    <p class="text-muted mb-3">{{ filteredEvents().length }} event{{ filteredEvents().length === 1 ? '' : 's' }} found</p>
     <div class="row g-4">
-      @for (event of filteredEvents(); track event.id) {
-        <div class="col-md-6 col-lg-4">
-          <div class="card h-100 shadow-sm border-0 event-card">
-            @if (event.imageUrl) {
-              <img [src]="event.imageUrl" class="card-img-top" [alt]="event.name" style="height: 200px; object-fit: cover;">
-            } @else {
-              <div class="card-img-top placeholder-img d-flex align-items-center justify-content-center">
-                <i class="bi bi-music-note-beamed display-1 text-white opacity-75"></i>
-              </div>
-            }
-            <div class="card-body d-flex flex-column">
-              <h5 class="card-title fw-bold">
-                {{ event.name }}
-                @if (eventApi.isCanceled(event.id)) {
-                  <span class="badge bg-danger ms-2">Canceled</span>
-                }
-              </h5>
-              @if (event.performers) {
-                <p class="text-muted small mb-1">
-                  <i class="bi bi-mic me-1"></i>{{ event.performers }}
-                </p>
-              }
-              <p class="text-muted small mb-1">
-                <i class="bi bi-geo-alt me-1"></i>{{ event.location }}
-              </p>
-              <p class="text-muted small mb-2">
-                <i class="bi bi-calendar3 me-1"></i>{{ event.eventDate | date:'medium' }}
-              </p>
-              @if (event.price) {
-                <p class="fw-bold text-primary mb-2">{{ event.price | currency:'EUR' }}</p>
-              } @else {
-                <p class="fw-bold text-success mb-2">Free</p>
-              }
-              <a [routerLink]="['/events', event.id]" class="btn btn-outline-primary mt-auto">View Details</a>
-            </div>
-          </div>
+      @for (i of [1,2,3,4,5,6]; track i) {
+        <div class="col-6 col-md-6 col-lg-4">
+          <app-skeleton-card />
         </div>
       }
     </div>
+  } @else {
+    <!-- Featured Events -->
+    @if (featuredEvents().length > 0 && !searchQuery() && !genreFilter() && !locationFilter() && !dateFilter() && !artistFilter()) {
+      <div class="featured-section mb-5">
+        <h4 class="fw-bold mb-3"><i class="bi bi-star-fill text-warning me-2"></i>Featured Events</h4>
+        <div class="row g-4">
+          @for (event of featuredEvents(); track event.id) {
+            <div class="col-6 col-md-6 col-lg-4">
+              <a [routerLink]="['/events', event.id]" class="text-decoration-none">
+                <div class="card border-0 h-100 event-card featured-card">
+                  @if (event.imageUrl) {
+                    <div class="event-card-img-wrap">
+                      <img [src]="eventApi.resolveImageUrl(event.imageUrl)" class="card-img-top" [alt]="event.name">
+                      <span class="featured-badge"><i class="bi bi-star-fill me-1"></i>Featured</span>
+                    </div>
+                  } @else {
+                    <div class="event-card-img-wrap placeholder-img">
+                      <i class="bi bi-music-note-beamed display-4 text-white opacity-75"></i>
+                      <span class="featured-badge"><i class="bi bi-star-fill me-1"></i>Featured</span>
+                    </div>
+                  }
+                  <div class="card-body">
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                      <span class="event-date-badge">
+                        <i class="bi bi-calendar3 me-1"></i>{{ event.eventDate | date:'mediumDate' }}
+                      </span>
+                      @if (event.genre) {
+                        <span class="genre-badge">{{ event.genre }}</span>
+                      }
+                      @if (event.price) {
+                        <span class="event-price-badge">{{ event.price | currency:'EUR' }}</span>
+                      } @else {
+                        <span class="event-price-badge event-price-badge--free">Free</span>
+                      }
+                      @if (isSoldOut(event)) {
+                        <span class="capacity-badge capacity-badge--sold-out">Sold Out</span>
+                      } @else if (spotsLeft(event) !== null && spotsLeft(event)! <= 20) {
+                        <span class="capacity-badge capacity-badge--low">{{ spotsLeft(event) }} left</span>
+                      }
+                    </div>
+                    <h5 class="card-title fw-bold mb-1">{{ event.name }}</h5>
+                    <p class="text-muted small mb-1">
+                      <i class="bi bi-geo-alt me-1"></i>{{ event.location }}
+                    </p>
+                    @if (event.averageRating) {
+                      <div class="card-rating mb-1">
+                        <app-star-rating [value]="event.averageRating" [count]="event.ratingCount ?? 0" [showValue]="true" [showCount]="true" />
+                      </div>
+                    }
+                    @if (event.attendingCount) {
+                      <p class="text-muted small mb-0">
+                        <i class="bi bi-people-fill me-1"></i>{{ event.attendingCount }} attending
+                      </p>
+                    }
+                  </div>
+                </div>
+              </a>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- All Events -->
+    @if (filteredEvents().length === 0) {
+      <div class="text-center py-5">
+        <div class="empty-state-icon">
+          <i class="bi bi-search"></i>
+        </div>
+        <h5 class="fw-bold mt-3">No events found</h5>
+        <p class="text-muted">Try adjusting your filters or search terms</p>
+        <button class="btn btn-primary" (click)="clearFilters()">Clear Filters</button>
+      </div>
+    } @else {
+      <p class="text-muted small mb-3">
+        Showing {{ displayedEvents().length }} of {{ filteredEvents().length }} event{{ filteredEvents().length === 1 ? '' : 's' }}
+      </p>
+      <div class="row g-4">
+        @for (event of displayedEvents(); track event.id) {
+          <div class="col-6 col-md-6 col-lg-4">
+            <a [routerLink]="['/events', event.id]" class="text-decoration-none">
+              <div class="card border-0 h-100 event-card" [class.opacity-75]="event.canceled">
+                @if (event.imageUrl) {
+                  <div class="event-card-img-wrap">
+                    <img [src]="eventApi.resolveImageUrl(event.imageUrl)" class="card-img-top" [alt]="event.name">
+                    @if (event.canceled) {
+                      <span class="event-status-overlay">Canceled</span>
+                    }
+                  </div>
+                } @else {
+                  <div class="event-card-img-wrap placeholder-img">
+                    <i class="bi bi-music-note-beamed display-4 text-white opacity-75"></i>
+                    @if (event.canceled) {
+                      <span class="event-status-overlay">Canceled</span>
+                    }
+                  </div>
+                }
+                <div class="card-body">
+                  <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                    <span class="event-date-badge">
+                      <i class="bi bi-calendar3 me-1"></i>{{ event.eventDate | date:'mediumDate' }}
+                    </span>
+                    @if (event.genre) {
+                      <span class="genre-badge">{{ event.genre }}</span>
+                    }
+                    @if (event.price) {
+                      <span class="event-price-badge">{{ event.price | currency:'EUR' }}</span>
+                    } @else {
+                      <span class="event-price-badge event-price-badge--free">Free</span>
+                    }
+                    @if (isSoldOut(event)) {
+                      <span class="capacity-badge capacity-badge--sold-out">Sold Out</span>
+                    } @else if (spotsLeft(event) !== null && spotsLeft(event)! <= 20) {
+                      <span class="capacity-badge capacity-badge--low">{{ spotsLeft(event) }} left</span>
+                    }
+                  </div>
+                  <h5 class="card-title fw-bold mb-1">{{ event.name }}</h5>
+                  @if (event.artists && event.artists.length > 0) {
+                    <p class="text-muted small mb-1">
+                      <i class="bi bi-mic me-1"></i>{{ artistNames(event) }}
+                    </p>
+                  }
+                  <p class="text-muted small mb-1">
+                    <i class="bi bi-geo-alt me-1"></i>{{ event.location }}
+                  </p>
+                  @if (event.averageRating) {
+                    <div class="card-rating mb-1">
+                      <app-star-rating [value]="event.averageRating" [count]="event.ratingCount ?? 0" [showValue]="true" [showCount]="true" />
+                    </div>
+                  }
+                  @if (event.attendingCount) {
+                    <p class="text-muted small mb-1">
+                      <i class="bi bi-people-fill me-1"></i>{{ event.attendingCount }} attending
+                    </p>
+                  }
+                  @if (event.organizer) {
+                    <p class="text-muted small mb-0">
+                      <i class="bi bi-person me-1"></i>
+                      @if (event.organizer.organizationName) {
+                        {{ event.organizer.organizationName }}, {{ event.organizer.name }}
+                      } @else {
+                        {{ event.organizer.name }}
+                      }
+                    </p>
+                  }
+                </div>
+                @if (isAdmin()) {
+                  <div class="card-footer bg-transparent border-top py-2 px-3">
+                    <div class="d-flex gap-2">
+                      <button
+                        class="btn btn-sm"
+                        [class.btn-warning]="event.featured"
+                        [class.btn-outline-warning]="!event.featured"
+                        (click)="onAdminToggleFeatured($event, event)"
+                        [attr.aria-label]="event.featured ? 'Unfeature' : 'Feature'">
+                        <i class="bi bi-star-fill"></i>
+                      </button>
+                      <button
+                        class="btn btn-sm flex-grow-1"
+                        [class.btn-outline-warning]="!event.canceled"
+                        [class.btn-outline-success]="event.canceled"
+                        (click)="onAdminCancel($event, event)">
+                        @if (event.canceled) {
+                          <i class="bi bi-arrow-counterclockwise me-1"></i>Restore
+                        } @else {
+                          <i class="bi bi-slash-circle me-1"></i>Cancel
+                        }
+                      </button>
+                      <button
+                        class="btn btn-sm btn-outline-danger"
+                        (click)="onAdminDelete($event, event)">
+                        <i class="bi bi-trash me-1"></i>Delete
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+            </a>
+          </div>
+        }
+      </div>
+
+      <!-- Infinite Scroll Sentinel -->
+      @if (hasMore()) {
+        <div #scrollSentinel class="text-center mt-4 py-3">
+          <button class="btn btn-outline-primary" (click)="loadMore()">
+            <i class="bi bi-arrow-down-circle me-2"></i>Load More Events
+          </button>
+        </div>
+      }
+    }
   }
 </div>
+
+<app-back-to-top />

@@ -1,14 +1,18 @@
 export interface User {
   id: number;
   name: string;
-  rola: UserRole;
+  role: UserRole;
   email: string;
+  organizationName?: string;
+  organizationDescription?: string;
+  artistName?: string;
+  artistDescription?: string;
 }
 
 export interface CreateUserRequest {
   name: string;
   email: string;
-  rola: UserRole;
+  role: UserRole;
 }
 
-export type UserRole = 'USER' | 'ORGANIZER' | 'ADMIN';
+export type UserRole = 'USER' | 'ORGANIZER' | 'ARTIST' | 'ADMIN';

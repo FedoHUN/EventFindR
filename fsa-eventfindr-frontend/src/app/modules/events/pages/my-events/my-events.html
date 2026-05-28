@@ -1,101 +1,309 @@
-<div class="container py-4">
-  <div class="d-flex align-items-center justify-content-between mb-4">
-    <h1 class="fw-bold mb-0"><i class="bi bi-calendar-check me-2"></i>My Events</h1>
+<div class="container py-5">
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div>
+      <h1 class="fw-bold mb-1">My Events</h1>
+      <p class="text-muted mb-0">Manage and track the events you've created</p>
+    </div>
     <a routerLink="/events/create" class="btn btn-primary">
-      <i class="bi bi-plus-circle me-1"></i>Create Event
+      <i class="bi bi-plus-lg me-1"></i>Create Event
     </a>
   </div>
+
+  <!-- Tabs -->
+  <ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+      <button class="nav-link" [class.active]="activeTab() === 'upcoming'" (click)="activeTab.set('upcoming')">
+        <i class="bi bi-calendar-event me-1"></i>Upcoming <span class="badge bg-primary ms-1">{{ upcomingEvents().length }}</span>
+      </button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" [class.active]="activeTab() === 'past'" (click)="activeTab.set('past')">
+        <i class="bi bi-clock-history me-1"></i>Past <span class="badge bg-secondary ms-1">{{ pastEvents().length }}</span>
+      </button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" [class.active]="activeTab() === 'drafts'" (click)="activeTab.set('drafts')">
+        <i class="bi bi-file-earmark me-1"></i>Drafts <span class="badge bg-warning text-dark ms-1">{{ drafts().length }}</span>
+      </button>
+    </li>
+  </ul>
 
   @if (loading()) {
     <div class="text-center py-5">
       <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Loading…</span>
+        <span class="visually-hidden">Loading...</span>
       </div>
     </div>
-  } @else if (myEvents().length === 0) {
-    <div class="text-center py-5">
-      <i class="bi bi-calendar-x display-1 text-muted"></i>
-      <p class="text-muted mt-3 fs-5">You haven't created any events yet.</p>
-      <a routerLink="/events/create" class="btn btn-primary">
-        <i class="bi bi-plus-circle me-1"></i>Create your first event
-      </a>
-    </div>
-  } @else {
-    <p class="text-muted mb-3">{{ myEvents().length }} event{{ myEvents().length === 1 ? '' : 's' }}</p>
-    <div class="row g-4">
-      @for (event of myEvents(); track event.id) {
-        <div class="col-md-6 col-lg-4">
-          <div
-            class="card h-100 shadow-sm border-0 my-event-card"
-            [class.past-event]="isPast(event)"
-            [class.canceled-event]="eventApi.isCanceled(event.id)">
+  } @else if (activeTab() === 'upcoming') {
+    @if (upcomingEvents().length === 0) {
+      <div class="empty-state">
+        <div class="empty-state-icon">
+          <i class="bi bi-calendar-plus"></i>
+        </div>
+        <h4 class="fw-bold mt-3">No upcoming events</h4>
+        <p class="text-muted">Create an event to start reaching your audience.</p>
+        <a routerLink="/events/create" class="btn btn-primary">
+          <i class="bi bi-plus-lg me-1"></i>Create Event
+        </a>
+      </div>
+    } @else {
+      <div class="row g-4">
+        @for (event of upcomingEvents(); track event.id) {
+          <div class="col-md-6 col-lg-4">
+            <div
+              class="card border-0 h-100 my-event-card"
+              [class.canceled-event]="event.canceled">
 
-            @if (event.imageUrl) {
-              <img [src]="event.imageUrl" class="card-img-top" [alt]="event.name" style="height: 180px; object-fit: cover;">
-            } @else {
-              <div class="card-img-top placeholder-img d-flex align-items-center justify-content-center">
-                <i class="bi bi-music-note-beamed display-3 text-white opacity-75"></i>
-              </div>
-            }
+              @if (event.imageUrl) {
+                <div class="my-event-img-wrap">
+                  <img [src]="eventApi.resolveImageUrl(event.imageUrl)" class="card-img-top" [alt]="event.name">
+                  <div class="event-status-badge-wrap">
+                    @if (event.canceled) {
+                      <span class="event-status-badge event-status-badge--canceled">Canceled</span>
+                    } @else {
+                      <span class="event-status-badge event-status-badge--active">Active</span>
+                    }
+                  </div>
+                </div>
+              } @else {
+                <div class="my-event-img-wrap placeholder-img">
+                  <i class="bi bi-music-note-beamed display-4 text-white opacity-75"></i>
+                  <div class="event-status-badge-wrap">
+                    @if (event.canceled) {
+                      <span class="event-status-badge event-status-badge--canceled">Canceled</span>
+                    } @else {
+                      <span class="event-status-badge event-status-badge--active">Active</span>
+                    }
+                  </div>
+                </div>
+              }
 
-            <div class="card-body d-flex flex-column">
-              <div class="d-flex align-items-start gap-2 mb-2">
-                <h5 class="card-title fw-bold mb-0 flex-grow-1">{{ event.name }}</h5>
-                @if (eventApi.isCanceled(event.id)) {
-                  <span class="badge bg-danger text-nowrap">Canceled</span>
-                } @else if (isPast(event)) {
-                  <span class="badge bg-secondary text-nowrap">Past</span>
+              <div class="card-body">
+                <h5 class="card-title fw-bold mb-2">{{ event.name }}</h5>
+                @if (event.artists && event.artists.length > 0) {
+                  <p class="text-muted small mb-1">
+                    <i class="bi bi-mic me-1"></i>{{ artistNames(event) }}
+                  </p>
+                }
+                <p class="text-muted small mb-1">
+                  <i class="bi bi-geo-alt me-1"></i>{{ event.location }}
+                </p>
+                <p class="text-muted small mb-2">
+                  <i class="bi bi-calendar3 me-1"></i>{{ event.eventDate | date:'medium' }}
+                </p>
+
+                <div class="attendance-dashboard mb-2">
+                  @if (event.attendingCount) {
+                    <span class="att-stat att-stat--attending">
+                      <i class="bi bi-people-fill me-1"></i>{{ event.attendingCount }}
+                    </span>
+                  }
+                  @if (event.watchingCount) {
+                    <span class="att-stat att-stat--watching">
+                      <i class="bi bi-eye-fill me-1"></i>{{ event.watchingCount }}
+                    </span>
+                  }
+                  @if (event.commentCount) {
+                    <span class="att-stat att-stat--comments">
+                      <i class="bi bi-chat-fill me-1"></i>{{ event.commentCount }}
+                    </span>
+                  }
+                </div>
+
+                @if (event.price) {
+                  <span class="fw-bold text-primary">{{ event.price | currency:'EUR' }}</span>
                 } @else {
-                  <span class="badge bg-success text-nowrap">Active</span>
+                  <span class="fw-bold text-success">Free</span>
                 }
               </div>
 
-              @if (event.performers) {
-                <p class="text-muted small mb-1">
-                  <i class="bi bi-mic me-1"></i>{{ event.performers }}
-                </p>
-              }
-              <p class="text-muted small mb-1">
-                <i class="bi bi-geo-alt me-1"></i>{{ event.location }}
-              </p>
-              <p class="text-muted small mb-2">
-                <i class="bi bi-calendar3 me-1"></i>{{ event.eventDate | date:'medium' }}
-              </p>
-              @if (event.price) {
-                <p class="fw-bold text-primary mb-0">{{ event.price | currency:'EUR' }}</p>
-              } @else {
-                <p class="fw-bold text-success mb-0">Free</p>
-              }
-            </div>
-
-            <div class="card-footer bg-transparent border-top-0 pt-0 pb-3 px-3">
-              <div class="d-flex gap-2">
-                <a [routerLink]="['/events', event.id]" class="btn btn-sm btn-outline-primary flex-grow-1">
-                  <i class="bi bi-eye me-1"></i>View
-                </a>
-                <button
-                  class="btn btn-sm flex-grow-1"
-                  [class.btn-outline-warning]="!eventApi.isCanceled(event.id)"
-                  [class.btn-outline-success]="eventApi.isCanceled(event.id)"
-                  (click)="onToggleCanceled(event)"
-                  [attr.aria-label]="eventApi.isCanceled(event.id) ? 'Restore event' : 'Cancel event'">
-                  @if (eventApi.isCanceled(event.id)) {
-                    <i class="bi bi-arrow-counterclockwise me-1"></i>Restore
-                  } @else {
-                    <i class="bi bi-slash-circle me-1"></i>Cancel
-                  }
-                </button>
-                <button
-                  class="btn btn-sm btn-outline-danger"
-                  (click)="onDelete(event)"
-                  aria-label="Delete event">
-                  <i class="bi bi-trash"></i>
-                </button>
+              <div class="card-footer bg-transparent border-0 pt-0 pb-3 px-3">
+                <div class="d-flex gap-2">
+                  <a [routerLink]="['/events', event.id]" class="btn btn-sm btn-outline-primary flex-grow-1">
+                    <i class="bi bi-eye me-1"></i>View
+                  </a>
+                  <button class="btn btn-sm btn-outline-secondary" (click)="onEdit(event)" aria-label="Edit event">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button
+                    class="btn btn-sm"
+                    [class.btn-outline-warning]="!event.canceled"
+                    [class.btn-outline-success]="event.canceled"
+                    (click)="onToggleCanceled(event)"
+                    [attr.aria-label]="event.canceled ? 'Restore event' : 'Cancel event'">
+                    @if (event.canceled) {
+                      <i class="bi bi-arrow-counterclockwise"></i>
+                    } @else {
+                      <i class="bi bi-slash-circle"></i>
+                    }
+                  </button>
+                  <button
+                    class="btn btn-sm btn-outline-danger"
+                    (click)="onDelete(event)"
+                    aria-label="Delete event">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
+        }
+      </div>
+    }
+  } @else if (activeTab() === 'past') {
+    @if (pastEvents().length === 0) {
+      <div class="empty-state">
+        <div class="empty-state-icon">
+          <i class="bi bi-clock-history"></i>
         </div>
-      }
-    </div>
+        <h4 class="fw-bold mt-3">No past events</h4>
+        <p class="text-muted">Your completed events will appear here.</p>
+      </div>
+    } @else {
+      <div class="row g-4">
+        @for (event of pastEvents(); track event.id) {
+          <div class="col-md-6 col-lg-4">
+            <div
+              class="card border-0 h-100 my-event-card past-event"
+              [class.canceled-event]="event.canceled">
+
+              @if (event.imageUrl) {
+                <div class="my-event-img-wrap">
+                  <img [src]="eventApi.resolveImageUrl(event.imageUrl)" class="card-img-top" [alt]="event.name">
+                  <div class="event-status-badge-wrap">
+                    @if (event.canceled) {
+                      <span class="event-status-badge event-status-badge--canceled">Canceled</span>
+                    } @else {
+                      <span class="event-status-badge event-status-badge--past">Past</span>
+                    }
+                  </div>
+                </div>
+              } @else {
+                <div class="my-event-img-wrap placeholder-img">
+                  <i class="bi bi-music-note-beamed display-4 text-white opacity-75"></i>
+                  <div class="event-status-badge-wrap">
+                    @if (event.canceled) {
+                      <span class="event-status-badge event-status-badge--canceled">Canceled</span>
+                    } @else {
+                      <span class="event-status-badge event-status-badge--past">Past</span>
+                    }
+                  </div>
+                </div>
+              }
+
+              <div class="card-body">
+                <h5 class="card-title fw-bold mb-2">{{ event.name }}</h5>
+                @if (event.artists && event.artists.length > 0) {
+                  <p class="text-muted small mb-1">
+                    <i class="bi bi-mic me-1"></i>{{ artistNames(event) }}
+                  </p>
+                }
+                <p class="text-muted small mb-1">
+                  <i class="bi bi-geo-alt me-1"></i>{{ event.location }}
+                </p>
+                <p class="text-muted small mb-2">
+                  <i class="bi bi-calendar3 me-1"></i>{{ event.eventDate | date:'medium' }}
+                </p>
+
+                <div class="attendance-dashboard mb-2">
+                  @if (event.attendingCount) {
+                    <span class="att-stat att-stat--attending">
+                      <i class="bi bi-people-fill me-1"></i>{{ event.attendingCount }}
+                    </span>
+                  }
+                  @if (event.watchingCount) {
+                    <span class="att-stat att-stat--watching">
+                      <i class="bi bi-eye-fill me-1"></i>{{ event.watchingCount }}
+                    </span>
+                  }
+                  @if (event.commentCount) {
+                    <span class="att-stat att-stat--comments">
+                      <i class="bi bi-chat-fill me-1"></i>{{ event.commentCount }}
+                    </span>
+                  }
+                </div>
+
+                @if (event.price) {
+                  <span class="fw-bold text-primary">{{ event.price | currency:'EUR' }}</span>
+                } @else {
+                  <span class="fw-bold text-success">Free</span>
+                }
+              </div>
+
+              <div class="card-footer bg-transparent border-0 pt-0 pb-3 px-3">
+                <div class="d-flex gap-2">
+                  <a [routerLink]="['/events', event.id]" class="btn btn-sm btn-outline-primary flex-grow-1">
+                    <i class="bi bi-eye me-1"></i>View
+                  </a>
+                  <button
+                    class="btn btn-sm btn-outline-danger"
+                    (click)="onDelete(event)"
+                    aria-label="Delete event">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  } @else {
+    <!-- Drafts tab -->
+    @if (drafts().length === 0) {
+      <div class="empty-state">
+        <div class="empty-state-icon">
+          <i class="bi bi-file-earmark"></i>
+        </div>
+        <h4 class="fw-bold mt-3">No drafts</h4>
+        <p class="text-muted">Create an event and save it as a draft to see it here.</p>
+      </div>
+    } @else {
+      <div class="row g-4">
+        @for (draft of drafts(); track draft.id) {
+          <div class="col-md-6 col-lg-4">
+            <div class="card border-0 h-100 my-event-card draft-card">
+              @if (draft.imageUrl) {
+                <div class="my-event-img-wrap">
+                  <img [src]="eventApi.resolveImageUrl(draft.imageUrl)" class="card-img-top" [alt]="draft.name">
+                  <div class="event-status-badge-wrap">
+                    <span class="event-status-badge event-status-badge--draft">Draft</span>
+                  </div>
+                </div>
+              } @else {
+                <div class="my-event-img-wrap placeholder-img">
+                  <i class="bi bi-music-note-beamed display-4 text-white opacity-75"></i>
+                  <div class="event-status-badge-wrap">
+                    <span class="event-status-badge event-status-badge--draft">Draft</span>
+                  </div>
+                </div>
+              }
+              <div class="card-body">
+                <h5 class="card-title fw-bold mb-2">{{ draft.name }}</h5>
+                <p class="text-muted small mb-1">
+                  <i class="bi bi-geo-alt me-1"></i>{{ draft.location }}
+                </p>
+                <p class="text-muted small mb-2">
+                  <i class="bi bi-calendar3 me-1"></i>{{ draft.eventDate | date:'medium' }}
+                </p>
+              </div>
+              <div class="card-footer bg-transparent border-0 pt-0 pb-3 px-3">
+                <div class="d-flex gap-2">
+                  <button class="btn btn-sm btn-success flex-grow-1" (click)="onPublish(draft)">
+                    <i class="bi bi-send me-1"></i>Publish
+                  </button>
+                  <button class="btn btn-sm btn-outline-secondary" (click)="onEdit(draft)" aria-label="Edit draft">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button class="btn btn-sm btn-outline-danger" (click)="onDelete(draft)" aria-label="Delete draft">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
   }
 </div>

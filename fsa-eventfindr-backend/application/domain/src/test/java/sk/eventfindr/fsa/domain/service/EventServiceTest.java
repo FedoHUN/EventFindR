@@ -1,14 +1,19 @@
 package sk.eventfindr.fsa.domain.service;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import sk.eventfindr.fsa.domain.Event;
+import sk.eventfindr.fsa.domain.EventArtistRepository;
 import sk.eventfindr.fsa.domain.EventAttendanceRepository;
+import sk.eventfindr.fsa.domain.EventCommentRepository;
+import sk.eventfindr.fsa.domain.EventMediaRepository;
 import sk.eventfindr.fsa.domain.EventRepository;
 import sk.eventfindr.fsa.domain.EventfindrException;
+import sk.eventfindr.fsa.domain.MediaStorage;
+import sk.eventfindr.fsa.domain.VideoCompressor;
 import sk.eventfindr.fsa.domain.User;
 import sk.eventfindr.fsa.domain.UserRepository;
 import sk.eventfindr.fsa.domain.UserRole;
@@ -36,10 +41,59 @@ class EventServiceTest {
     private UserRepository userRepository;
 
     @Mock
+    private EventArtistRepository eventArtistRepository;
+
+    @Mock
     private EventAttendanceRepository eventAttendanceRepository;
 
-    @InjectMocks
+    @Mock
+    private EventMediaRepository eventMediaRepository;
+
+    @Mock
+    private EventCommentRepository eventCommentRepository;
+
+    @Mock
+    private MediaStorage mediaStorage;
+
+    @Mock
+    private VideoCompressor videoCompressor;
+
+    @Mock
+    private NotificationFacade notificationFacade;
+
     private EventService service;
+    private EventAttendanceService attendanceService;
+
+    @BeforeEach
+    void setUp() {
+        EventEnrichmentService eventEnrichmentService = new EventEnrichmentService(
+                eventArtistRepository,
+                eventAttendanceRepository,
+                eventCommentRepository,
+                eventMediaRepository
+        );
+        EventMediaService eventMediaService = new EventMediaService(
+                eventRepository,
+                eventMediaRepository,
+                userRepository,
+                mediaStorage,
+                videoCompressor
+        );
+        service = new EventService(
+                eventRepository,
+                userRepository,
+                eventMediaRepository,
+                eventArtistRepository,
+                notificationFacade,
+                eventEnrichmentService,
+                eventMediaService
+        );
+        attendanceService = new EventAttendanceService(
+                eventRepository,
+                userRepository,
+                eventAttendanceRepository
+        );
+    }
 
     @Test
     void createPreparesEventAndPersistsIt() {
@@ -103,7 +157,7 @@ class EventServiceTest {
         when(userRepository.get(2L)).thenReturn(Optional.of(user));
         when(eventAttendanceRepository.findByEventAndUser(1L, 2L)).thenReturn(Optional.empty());
 
-        service.attend(1L, 2L, "ATTENDING");
+        attendanceService.attend(1L, 2L, "ATTENDING");
 
         verify(eventAttendanceRepository).create(any());
     }
@@ -113,7 +167,7 @@ class EventServiceTest {
         when(eventRepository.findById(999L)).thenReturn(Optional.empty());
 
         EventfindrException ex = assertThrows(EventfindrException.class,
-                () -> service.attend(999L, 1L, "ATTENDING"));
+                () -> attendanceService.attend(999L, 1L, "ATTENDING"));
 
         assertEquals(EventfindrException.Type.NOT_FOUND, ex.getType());
     }
@@ -126,7 +180,7 @@ class EventServiceTest {
         when(userRepository.get(999L)).thenReturn(Optional.empty());
 
         EventfindrException ex = assertThrows(EventfindrException.class,
-                () -> service.attend(1L, 999L, "ATTENDING"));
+                () -> attendanceService.attend(1L, 999L, "ATTENDING"));
 
         assertEquals(EventfindrException.Type.NOT_FOUND, ex.getType());
     }
@@ -143,7 +197,7 @@ class EventServiceTest {
         when(eventAttendanceRepository.findByEventAndUser(1L, 2L)).thenReturn(Optional.of(new sk.eventfindr.fsa.domain.EventAttendance()));
 
         EventfindrException ex = assertThrows(EventfindrException.class,
-                () -> service.attend(1L, 2L, "ATTENDING"));
+                () -> attendanceService.attend(1L, 2L, "ATTENDING"));
 
         assertEquals(EventfindrException.Type.CONFLICT, ex.getType());
         verify(eventAttendanceRepository, never()).create(any());
@@ -160,7 +214,7 @@ class EventServiceTest {
         when(userRepository.get(2L)).thenReturn(Optional.of(user));
 
         EventfindrException ex = assertThrows(EventfindrException.class,
-                () -> service.attend(1L, 2L, "INVALID_STATUS"));
+                () -> attendanceService.attend(1L, 2L, "INVALID_STATUS"));
 
         assertEquals(EventfindrException.Type.VALIDATION, ex.getType());
     }
@@ -180,7 +234,7 @@ class EventServiceTest {
         user.setId(1L);
         user.setName("Organizer");
         user.setEmail("org@eventfindr.sk");
-        user.setRola(UserRole.ORGANIZER);
+        user.setRole(UserRole.ORGANIZER);
         return user;
     }
 }

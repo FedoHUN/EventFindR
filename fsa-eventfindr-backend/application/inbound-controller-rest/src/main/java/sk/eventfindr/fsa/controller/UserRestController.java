@@ -2,8 +2,13 @@ package sk.eventfindr.fsa.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import sk.eventfindr.fsa.domain.EventfindrException;
 import sk.eventfindr.fsa.domain.User;
 import sk.eventfindr.fsa.domain.service.UserFacade;
 import sk.eventfindr.fsa.mapper.UserMapper;
@@ -43,6 +48,15 @@ public class UserRestController implements UsersApi {
         return ResponseEntity.ok(userMapper.toDto(user));
     }
 
+    @GetMapping("/users/{id}")
+    public ResponseEntity<UserDto> getUserById(@PathVariable("id") Long id) {
+        User user = userFacade.get(id)
+                .orElseThrow(() -> new EventfindrException(
+                        EventfindrException.Type.NOT_FOUND,
+                        "User was not found"));
+        return ResponseEntity.ok(userMapper.toDto(user));
+    }
+
     @GetMapping("/users/organizers")
     public ResponseEntity<List<UserDto>> getOrganizers() {
         Collection<User> organizers = userFacade.getOrganizers();
@@ -53,9 +67,52 @@ public class UserRestController implements UsersApi {
     }
 
     @PostMapping("/users/me/become-organizer")
-    public ResponseEntity<Void> becomeOrganizer() {
+    public ResponseEntity<Void> becomeOrganizer(@RequestBody BecomeOrganizerRequest request) {
         String email = currentUserDetailService.getUserEmail();
-        userFacade.becomeOrganizer(email);
+        userFacade.becomeOrganizer(email, request.organizationName());
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/users/me/become-artist")
+    public ResponseEntity<Void> becomeArtist(@RequestBody BecomeArtistRequest request) {
+        String email = currentUserDetailService.getUserEmail();
+        userFacade.becomeArtist(email, request.artistName());
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/users/me/organization-name")
+    public ResponseEntity<Void> updateOrganizationName(@RequestBody UpdateOrganizationNameRequest request) {
+        String email = currentUserDetailService.getUserEmail();
+        userFacade.updateOrganizationName(email, request.organizationName());
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/users/me/organization-description")
+    public ResponseEntity<Void> updateOrganizationDescription(@RequestBody UpdateOrganizationDescriptionRequest request) {
+        String email = currentUserDetailService.getUserEmail();
+        userFacade.updateOrganizationDescription(email, request.organizationDescription());
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/users/me/artist-description")
+    public ResponseEntity<Void> updateArtistDescription(@RequestBody UpdateArtistDescriptionRequest request) {
+        String email = currentUserDetailService.getUserEmail();
+        userFacade.updateArtistDescription(email, request.artistDescription());
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/artists/search")
+    public ResponseEntity<List<UserDto>> searchArtists(@RequestParam(value = "q", required = false, defaultValue = "") String query) {
+        Collection<User> artists = userFacade.searchArtists(query);
+        List<UserDto> dtos = artists.stream()
+                .map(userMapper::toDto)
+                .toList();
+        return ResponseEntity.ok(dtos);
+    }
+
+    record BecomeOrganizerRequest(String organizationName) {}
+    record BecomeArtistRequest(String artistName) {}
+    record UpdateOrganizationNameRequest(String organizationName) {}
+    record UpdateOrganizationDescriptionRequest(String organizationDescription) {}
+    record UpdateArtistDescriptionRequest(String artistDescription) {}
 }

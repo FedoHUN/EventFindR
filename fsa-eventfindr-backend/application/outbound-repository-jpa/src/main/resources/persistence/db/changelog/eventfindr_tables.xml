@@ -96,4 +96,383 @@
                 constraintName="uq_attendance_event_user"/>
     </changeSet>
 
+    <changeSet id="4" author="eventfindr">
+        <addColumn tableName="app_user">
+            <column name="organization_name" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="5" author="eventfindr">
+        <createTable tableName="event_media">
+            <column name="media_id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="event_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="original_name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content_type" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="media_type" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_size" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sort_order" type="int" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="event_media"
+                baseColumnNames="event_id"
+                constraintName="fk_media_event"
+                referencedTableName="event"
+                referencedColumnNames="event_id"
+                onDelete="CASCADE"/>
+    </changeSet>
+
+    <changeSet id="6" author="eventfindr">
+        <addColumn tableName="app_user">
+            <column name="artist_name" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="7" author="eventfindr">
+        <createTable tableName="event_artist">
+            <column name="event_artist_id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="event_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="artist_user_id" type="bigint"/>
+            <column name="artist_name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sort_order" type="int" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="event_artist"
+                baseColumnNames="event_id"
+                constraintName="fk_event_artist_event"
+                referencedTableName="event"
+                referencedColumnNames="event_id"
+                onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint
+                baseTableName="event_artist"
+                baseColumnNames="artist_user_id"
+                constraintName="fk_event_artist_user"
+                referencedTableName="app_user"
+                referencedColumnNames="user_id"
+                onDelete="SET NULL"/>
+    </changeSet>
+
+    <changeSet id="8" author="eventfindr">
+        <sql>
+            INSERT INTO event_artist (event_id, artist_name, sort_order)
+            SELECT event_id, TRIM(unnest(string_to_array(performers, ','))), 0
+            FROM event
+            WHERE performers IS NOT NULL AND performers &lt;&gt; ''
+        </sql>
+        <dropColumn tableName="event" columnName="performers"/>
+    </changeSet>
+
+    <changeSet id="9" author="eventfindr">
+        <addColumn tableName="event">
+            <column name="canceled" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="10" author="eventfindr">
+        <addColumn tableName="event">
+            <column name="genre" type="varchar(100)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="11" author="eventfindr">
+        <addColumn tableName="event">
+            <column name="status" type="varchar(20)" defaultValue="PUBLISHED">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="12" author="eventfindr">
+        <addColumn tableName="event">
+            <column name="featured" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="13" author="eventfindr">
+        <createTable tableName="event_comment">
+            <column name="comment_id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="event_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content" type="varchar(2000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="event_comment"
+                baseColumnNames="event_id"
+                constraintName="fk_comment_event"
+                referencedTableName="event"
+                referencedColumnNames="event_id"
+                onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint
+                baseTableName="event_comment"
+                baseColumnNames="user_id"
+                constraintName="fk_comment_user"
+                referencedTableName="app_user"
+                referencedColumnNames="user_id"/>
+    </changeSet>
+
+    <changeSet id="14" author="eventfindr">
+        <createTable tableName="user_follow">
+            <column name="follow_id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="follower_user_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="followed_user_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="user_follow"
+                baseColumnNames="follower_user_id"
+                constraintName="fk_follow_follower"
+                referencedTableName="app_user"
+                referencedColumnNames="user_id"/>
+
+        <addForeignKeyConstraint
+                baseTableName="user_follow"
+                baseColumnNames="followed_user_id"
+                constraintName="fk_follow_followed"
+                referencedTableName="app_user"
+                referencedColumnNames="user_id"/>
+
+        <addUniqueConstraint
+                tableName="user_follow"
+                columnNames="follower_user_id, followed_user_id"
+                constraintName="uq_follow"/>
+    </changeSet>
+
+    <changeSet id="15" author="eventfindr">
+        <createTable tableName="notification">
+            <column name="notification_id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="event_id" type="bigint"/>
+            <column name="type" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="message" type="varchar(500)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_read" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="notification"
+                baseColumnNames="user_id"
+                constraintName="fk_notification_user"
+                referencedTableName="app_user"
+                referencedColumnNames="user_id"/>
+
+        <addForeignKeyConstraint
+                baseTableName="notification"
+                baseColumnNames="event_id"
+                constraintName="fk_notification_event"
+                referencedTableName="event"
+                referencedColumnNames="event_id"
+                onDelete="CASCADE"/>
+    </changeSet>
+
+    <changeSet id="16" author="eventfindr">
+        <addColumn tableName="event_comment">
+            <column name="rating" type="int"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="17" author="eventfindr">
+        <addColumn tableName="event">
+            <column name="capacity" type="int"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="18" author="eventfindr">
+        <createTable tableName="post">
+            <column name="post_id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="author_user_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content" type="varchar(5000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="timestamp"/>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="post"
+                baseColumnNames="author_user_id"
+                constraintName="fk_post_author"
+                referencedTableName="app_user"
+                referencedColumnNames="user_id"/>
+    </changeSet>
+
+    <changeSet id="19" author="eventfindr">
+        <createTable tableName="post_media">
+            <column name="media_id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="post_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="original_name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content_type" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="media_type" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_size" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sort_order" type="int" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="post_media"
+                baseColumnNames="post_id"
+                constraintName="fk_post_media_post"
+                referencedTableName="post"
+                referencedColumnNames="post_id"
+                onDelete="CASCADE"/>
+    </changeSet>
+
+    <changeSet id="20" author="eventfindr">
+        <addColumn tableName="app_user">
+            <column name="organization_description" type="varchar(2000)"/>
+            <column name="artist_description" type="varchar(2000)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="21" author="eventfindr">
+        <createIndex indexName="idx_event_status_date" tableName="event">
+            <column name="status"/>
+            <column name="event_date"/>
+        </createIndex>
+        <createIndex indexName="idx_event_organizer_status" tableName="event">
+            <column name="organizer_user_id"/>
+            <column name="status"/>
+        </createIndex>
+        <createIndex indexName="idx_event_media_event" tableName="event_media">
+            <column name="event_id"/>
+            <column name="sort_order"/>
+        </createIndex>
+        <createIndex indexName="idx_event_artist_artist_user" tableName="event_artist">
+            <column name="artist_user_id"/>
+        </createIndex>
+        <createIndex indexName="idx_event_artist_event" tableName="event_artist">
+            <column name="event_id"/>
+        </createIndex>
+        <createIndex indexName="idx_event_comment_event" tableName="event_comment">
+            <column name="event_id"/>
+        </createIndex>
+        <createIndex indexName="idx_user_follow_follower" tableName="user_follow">
+            <column name="follower_user_id"/>
+        </createIndex>
+        <createIndex indexName="idx_user_follow_followed" tableName="user_follow">
+            <column name="followed_user_id"/>
+        </createIndex>
+        <createIndex indexName="idx_notification_user_read_created" tableName="notification">
+            <column name="user_id"/>
+            <column name="is_read"/>
+            <column name="created"/>
+        </createIndex>
+        <createIndex indexName="idx_notification_user_event_type" tableName="notification">
+            <column name="user_id"/>
+            <column name="event_id"/>
+            <column name="type"/>
+        </createIndex>
+        <createIndex indexName="idx_post_author_created" tableName="post">
+            <column name="author_user_id"/>
+            <column name="created"/>
+        </createIndex>
+        <createIndex indexName="idx_post_media_post" tableName="post_media">
+            <column name="post_id"/>
+            <column name="sort_order"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="22" author="eventfindr">
+        <addUniqueConstraint
+                tableName="event_media"
+                columnNames="file_name"
+                constraintName="uq_event_media_file_name"/>
+        <addUniqueConstraint
+                tableName="post_media"
+                columnNames="file_name"
+                constraintName="uq_post_media_file_name"/>
+    </changeSet>
+
 </databaseChangeLog>
