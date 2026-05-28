@@ -69,7 +69,8 @@
 .file-preview-img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  background: var(--ef-surface-muted);
   display: block;
 }
 

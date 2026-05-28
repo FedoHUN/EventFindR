@@ -55,7 +55,7 @@ class SecurityConfiguration {
                 .requestMatchers(HttpMethod.DELETE, "/events/*/attend").authenticated()
 
                 // Verejne read-only endpointy dostupne bez prihlasenia.
-                .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+                .requestMatchers("/actuator/health", "/actuator/health/**", "/actuator/info").permitAll()
                 .requestMatchers(HttpMethod.GET, "/users/organizers").permitAll()
                 .requestMatchers(HttpMethod.GET, "/artists/search").permitAll()
                 .requestMatchers(HttpMethod.GET, "/users/*").permitAll()

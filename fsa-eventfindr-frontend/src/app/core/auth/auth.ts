@@ -115,7 +115,8 @@ export class AuthService {
     const claims = this.oauthService.getIdentityClaims() as Record<string, unknown> | null;
     if (!claims) return undefined;
 
-    const roles = (claims['realm_access'] as { roles?: string[] })?.roles ?? [];
+    const roles = ((claims['realm_access'] as { roles?: string[] })?.roles ?? [])
+      .map((role) => role.toUpperCase());
     let role: UserRole = 'USER';
     if (roles.includes('ADMIN')) role = 'ADMIN';
     else if (roles.includes('ORGANIZER')) role = 'ORGANIZER';

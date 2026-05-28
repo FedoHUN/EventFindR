@@ -37,6 +37,7 @@
   --ef-radius-md: #{$ef-radius-md};
   --ef-radius-lg: #{$ef-radius-lg};
   --ef-radius-xl: #{$ef-radius-xl};
+  --ef-surface-muted: #f0f1f3;
   --ef-card-bg: #ffffff;
   --app-navbar-height: 64px;
 }
@@ -45,6 +46,7 @@
 [data-bs-theme="dark"] {
   --ef-bg: #0f1117;
   --ef-surface: #1a1d27;
+  --ef-surface-muted: #151821;
   --ef-surface-warm: #1e2233;
   --ef-card-bg: #1a1d27;
   --ef-text: #e5e7eb;

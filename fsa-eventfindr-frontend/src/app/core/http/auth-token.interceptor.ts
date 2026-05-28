@@ -42,7 +42,7 @@ export class AuthTokenInterceptor implements HttpInterceptor {
       return false;
     }
 
-    const path = this.pathOf(request.url);
+    const path = this.apiPathOf(request.url);
 
     return path === '/events'
       || path === '/events/trending'
@@ -59,7 +59,8 @@ export class AuthTokenInterceptor implements HttpInterceptor {
       || /^\/posts\/\d+\/media\/\d+\/file$/.test(path);
   }
 
-  private pathOf(url: string): string {
-    return new URL(url, 'http://eventfindr.local').pathname;
+  private apiPathOf(url: string): string {
+    const path = new URL(url, 'http://eventfindr.local').pathname;
+    return path.startsWith('/api/') ? path.slice(4) : path;
   }
 }

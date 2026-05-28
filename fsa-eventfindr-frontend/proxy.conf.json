@@ -1,20 +1,10 @@
 {
-  "/events": {
-    "target": "http://localhost:8080"
-  },
-  "/users": {
-    "target": "http://localhost:8080"
-  },
-  "/artists": {
-    "target": "http://localhost:8080"
-  },
-  "/comments": {
-    "target": "http://localhost:8080"
-  },
-  "/notifications": {
-    "target": "http://localhost:8080"
-  },
-  "/posts": {
-    "target": "http://localhost:8080"
+  "/api": {
+    "target": "http://localhost:8080",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/api": ""
+    }
   }
 }

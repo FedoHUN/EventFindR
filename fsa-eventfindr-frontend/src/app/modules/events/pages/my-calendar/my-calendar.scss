@@ -73,7 +73,8 @@
   width: 60px;
   height: 60px;
   border-radius: var(--ef-radius-sm, 6px);
-  object-fit: cover;
+  object-fit: contain;
+  background: var(--ef-surface-muted);
   flex-shrink: 0;
 }
 

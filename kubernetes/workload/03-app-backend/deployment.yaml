@@ -13,11 +13,31 @@ spec:
       labels:
         app: eventfindr-be
     spec:
+      securityContext:
+        fsGroup: 10001
+        fsGroupChangePolicy: OnRootMismatch
+      initContainers:
+        - name: media-storage-permissions
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - chown -R 10001:10001 /application/media-storage
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: media-storage
+              mountPath: /application/media-storage
       containers:
         - name: eventfindr-be
           # Pred produkcnym deployom nastav vlastny ACR registry a idealne immutable image tag.
           image: acrfsavojtkom.azurecr.io/fsa-eventfindr-backend:latest
           imagePullPolicy: Always
+          securityContext:
+            runAsUser: 10001
+            runAsGroup: 10001
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
           env:
             # Databazove udaje prichadzaju iba z Kubernetes Secretu.
             - name: DB_URL
@@ -37,9 +57,9 @@ spec:
                   key: db_password
             # Keycloak URL musi presne sediet s issuerom v tokene.
             - name: ISSUER_URI
-              value: https://keycloak.20.223.129.102.nip.io/realms/EventfindR
+              value: https://keycloak.20.223.129.102.nip.io/auth/realms/FSA
             - name: JWT_URI
-              value: https://keycloak.20.223.129.102.nip.io/realms/EventfindR/protocol/openid-connect/certs
+              value: https://keycloak.20.223.129.102.nip.io/auth/realms/FSA/protocol/openid-connect/certs
             - name: JAVA_OPTS
               value: >-
                 -Dspring.profiles.active=keycloak
@@ -65,18 +85,20 @@ spec:
             httpGet:
               path: /actuator/health
               port: http
+            initialDelaySeconds: 20
             failureThreshold: 30
             periodSeconds: 5
+            timeoutSeconds: 5
           readinessProbe:
             httpGet:
-              path: /actuator/health
+              path: /actuator/health/readiness
               port: http
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
           livenessProbe:
             httpGet:
-              path: /actuator/health
+              path: /actuator/health/liveness
               port: http
             periodSeconds: 20
             timeoutSeconds: 5

@@ -430,6 +430,8 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
   private readonly isBrowser = isPlatformBrowser(this.platformId);
 
   private resizeObserver?: ResizeObserver;
+  private navbarHeightFrame?: number;
+  private lastNavbarHeight = 0;
   private readonly onWindowResize = () => this.updateNavbarHeight();
 
   ngAfterViewInit(): void {
@@ -457,6 +459,9 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
     }
 
     this.resizeObserver?.disconnect();
+    if (this.navbarHeightFrame) {
+      window.cancelAnimationFrame(this.navbarHeightFrame);
+    }
     window.removeEventListener('resize', this.onWindowResize);
   }
 
@@ -531,6 +536,19 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
-    this.document.documentElement.style.setProperty('--app-navbar-height', `${height.toFixed(2)}px`);
+    const roundedHeight = Math.round(height);
+    if (roundedHeight === this.lastNavbarHeight) {
+      return;
+    }
+
+    this.lastNavbarHeight = roundedHeight;
+    if (this.navbarHeightFrame) {
+      window.cancelAnimationFrame(this.navbarHeightFrame);
+    }
+
+    this.navbarHeightFrame = window.requestAnimationFrame(() => {
+      this.document.documentElement.style.setProperty('--app-navbar-height', `${roundedHeight}px`);
+      this.navbarHeightFrame = undefined;
+    });
   }
 }

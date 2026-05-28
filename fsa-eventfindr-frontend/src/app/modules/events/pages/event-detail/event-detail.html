@@ -35,13 +35,11 @@
               <div class="gallery-viewport">
                 @for (media of mediaList(); track media.id; let i = $index) {
                   @if (i === currentSlide()) {
-                    <div class="gallery-slide">
-                      @if (media.mediaType === 'VIDEO') {
-                        <video [src]="mediaUrl(media)" controls class="gallery-media"></video>
-                      } @else {
-                        <img [src]="mediaUrl(media)" [alt]="event()!.name" class="gallery-media">
-                      }
-                    </div>
+                    @if (media.mediaType === 'VIDEO') {
+                      <video [src]="mediaUrl(media)" controls class="gallery-media"></video>
+                    } @else {
+                      <img [src]="mediaUrl(media)" [alt]="event()!.name" class="gallery-media">
+                    }
                   }
                 }
               </div>
